@@ -1,0 +1,20 @@
+
+.sidebarcellhome ul, .sidebarcellhome li {margin: 0; padding: 0;}
+.sidebarcellhome ul
+	{
+	/*margin-left: 0em; */
+	margin-left: 15px; 
+	/*list-style-image: url('rightarrow_white_8x7.gif');*/
+	list-style:none;
+	margin-top: 0px;
+	margin-right: 10px;
+	margin-bottom: 0px;
+	padding-top: 0px;
+	padding-bottom: 10px;
+	}
+	
+.sidebarcellhome li {
+	padding-bottom: 5px;
+	padding-left: 5px;
+}
+	

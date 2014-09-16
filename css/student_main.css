@@ -1,0 +1,704 @@
+* {
+    margin: 0;
+}
+
+html, body {
+	height: 100%;
+    font-family: verdana, arial, sans-serif;
+}
+
+#header-elements{
+    float: left;
+    height: 123px;
+    width: 100%;
+}
+
+#main-wrapper {
+    height: 75%;
+    margin: 0 auto -4em;
+}
+
+.banner-row, .nav-bar{
+    width: 100%;
+    display: block;
+}
+
+#logo-cell {
+    width: 226px;
+    vertical-align: top;
+    text-align: left;
+    background-color: #ffffff;
+    float: left;
+}
+
+#school-cell {
+    overflow: hidden;
+}
+
+#search-cell {
+    width: 190px;
+    float: right;
+    vertical-align: middle;
+    line-height: 14px;
+    font-size: 12px;
+    padding-top: 10px;
+    margin-top: 0;
+}
+
+.searchForm {
+    background-color: #ffffff;
+    padding: 0;
+    margin: 0;
+    font-size:9px;
+}
+
+.searchtext {
+    width: 190px;
+    color: #000;
+    font-family: verdana, arial, sans-serif;
+    font-size: 11px;
+    text-decoration: none;
+    margin: 5px 0 3px -5px;
+    padding: 0;
+    text-align:center;
+}
+
+.searchtext a {
+    display:inline;
+}
+#top-nav-spacer {
+    background-color: #6aa3ae;
+}
+ 
+#top-nav-spacer-right {
+    border-right: 1px #b9b9b1 solid;
+}
+ 
+#navbarhomeright {
+	border-right: 1px #b9b9b1 solid;
+}
+
+.searchlink {
+	color: #000;
+	font-family: verdana, arial, sans-serif;
+    font-size: 11px;
+	text-decoration: none;
+}
+	
+input.searchRadio {
+	padding-left: 0;
+	margin-left: 0;
+	margin-right: 3px;
+	width: 12px;
+}
+	
+input.searchRadio2 {
+	padding-left: 0;
+	margin-right: 3px;
+	margin-left: 4px;
+	width: 12px;
+}
+
+.navbar {
+    background-color: #6aa3ae;
+    height: 29px;
+    text-align: left;
+    border-right: 1px solid #b9b9b1;
+}
+	
+ul#udm ul {
+    width: 200px; /* controls widths of all submenus in topnav */
+}
+.content-sidebar-wrapper{
+    height: 100%;
+    padding-top: 126px;
+}
+.content {
+	font-size: 15px;
+	line-height: 1.5em;
+    padding: 0 0 0 15px;
+    margin-right: 50px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+.contentcell {
+	width: 487px;
+	border-top: 1px solid #ffffff;
+	border-right: 1px solid #b9b9b1;
+	background-color: #ffffff;
+}
+	
+.contentcellwide {
+	border-top: 1px solid #ffffff;
+	border-right: 1px solid #b9b9b1;
+	background-color: #fff;
+}
+#content-wrapper{
+    overflow: hidden;
+    min-height: 100%;
+    position: relative;
+}
+.contentcellhome {
+	width: 713px;
+	border-top: 1px solid #ffffff;
+	border-right: 1px solid #ffffff;
+	background-color: #ffffff;
+	margin:0px; 
+	padding: 0px;
+}
+		
+#contentarea {
+	padding: 0px 10px 0px 10px;
+	font-family: verdana, arial, sans-serif;
+	font-size: 12px;
+	line-height: 1.5em;
+}
+	
+#contentarea h3 {
+	padding: 0 0 0 15px;	
+}
+	
+#hometopnavspacer {
+	border-left: 35px #ffffff solid; 
+	background-color:#6aa3ae;
+	border-right: 1px #b9b9b1 solid;
+}
+
+#contentarea a, #contentareahome2 a {
+	text-decoration: none;
+	color: #006666;
+}
+	
+#contentarea a:hover, #contentareahome2 a:hover {
+	text-decoration: underline;
+	color: #006666;	
+}
+
+#student_body #contentarea a, #student_body #contentareahome2 a, #student_body #contentarea a:hover, #student_body #contentareahome2 a:hover {
+	color: #3071aa;	
+}
+
+#contentarea dd {
+	margin-bottom: 5px;
+}		
+#contentarea dt {
+	margin-bottom: 3px;
+	font-weight: bold;
+}
+
+/* left sidebar */
+.left-sidebar{
+    background-color: #4d92cd;
+    width: 206px;
+    float: left;
+    min-height: 96%;
+    margin-right: 10px;
+    padding: 10px;
+}
+
+#breadcrumb {
+	font-size: 9px;
+	font-weight: normal;
+	color: #000;
+	padding-bottom: 0px;
+	margin-bottom: 0px;
+	margin-top: 10px;
+}
+
+#breadcrumbdivider {
+	background: #fff; 
+	font-size:0px; 
+	line-height: 1px;
+	clear:both;
+	width: 100%; 
+	border-bottom: 1px dotted #DED7D6; 
+	padding:0px;
+	margin:0px;
+}
+#breadcrumb p {
+	padding-bottom: 5px;
+	margin-bottom: 15px;
+	margin-top:0px;
+	padding-top:5px;
+}
+
+#breadcrumb a {
+	font-size: 9px;
+	font-weight: normal;
+	color: #000;
+	text-decoration: underline;
+}	
+.printfriendly {
+	display: none;
+	float: right;
+	font-size: 10px;
+	padding: 0;
+	margin: 5px 0 5px 0;
+}
+.printfriendly {
+    position: relative;
+}
+
+h1 {
+  font-size: 18px;
+  font-weight: bold; 
+}
+
+/* to avoid a spacing issue in IE on the 2 columns layout with wide banner image*/
+td.twocolumn h1 {
+  margin-top: 0px;
+}
+
+h2 {
+  font-size: 16px;
+  font-weight: bold; 
+}
+h2.blue {
+  color: #5190cd;
+}
+h3 {
+  font-size: 14px;
+  font-weight: bold; 
+}
+h4 {
+  font-size: 13px;
+  font-weight: bold; 
+}
+h5 {
+  font-size: 12px;
+  font-weight: bold; 
+}
+h6 {
+  font-size: 10px;
+} 
+
+.required {
+	font-size: 10px;
+	color: #f00;
+}
+.footer, .push{
+    height: 4em;
+    text-align: center;
+    clear: both;
+}
+#footer{
+    position: absolute;
+    bottom: 15px;
+    width: 100%;
+    height: 50px;
+    text-align: center;
+}
+
+blockquote {
+    /*width: 80%;*/
+    border: #fff 1px solid; /* Resolves an IE bug effecting borders on other elements */
+    border-top: 1px solid #c6c6c6;
+    border-bottom: 1px solid #c6c6c6;
+    padding: 0.8em;
+}
+blockquote p {
+    margin: 0.5em;
+    font-style: italic;
+    border: 0px;
+}
+
+blockquote cite {
+    text-align: right;
+    font-size: smaller;
+    font-weight: normal;
+    font-style: normal;
+    color: #003;
+}
+
+/* added by TLS 3/14/2007 */
+.errorsearchtext
+	{
+	color: #000;
+	font-family: verdana, arial, sans-serif;
+    font-size: 11px;
+	text-decoration: none;
+	}	
+
+.errorsearchtext input, .errorsearchtext select, .errorsearchtext textarea {
+	border: 1px solid #000;
+	padding-left: 5px;
+	background-color: #6aa3ae;
+}
+
+
+.errorsearchtext .searchinput {
+	border: 1px solid #000;
+	padding-left: 5px;
+	background-color: #fff;
+}
+
+#sitemap li {
+	list-style: none
+}	
+
+#menuList li
+{
+    display: inline;
+    list-style-type: none;
+    padding-right: 12px;
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+#menuList ul li a{
+    color: #ffffff;
+    text-decoration: none;
+}
+
+#menuList ul li a:visited{
+    color: #ffffff;
+    text-decoration: none;
+}
+
+#menuList ul li a:hover 
+{
+    text-decoration: none;
+    color: #cccccc;
+}
+#sidebar .title{
+    font-size: 12px;
+    color:#003399;
+    font-weight:bold;
+}
+
+img.centered {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+img.alignright {
+	padding: 4px;
+	margin: 0 0 2px 7px;
+	display: inline;
+}
+
+img.alignleft {
+	padding: 4px;
+	margin: 0 7px 2px 0;
+	display: inline;
+}
+.alignleft {
+	float:left;
+	padding:2px 0 0 10px;
+}
+.alignright {
+	float:right;
+	padding:2px 10px 0 5px;
+}
+.wp-caption.alignleft {
+    float:left;
+    margin-left:0;
+    margin-right:5px;
+}
+.wp-caption.aligncenter {
+    margin-left:auto;
+    margin-right:auto;
+}
+.wp-caption.alignright {
+    float:right;
+    margin-left:5px;
+    margin-right:0;
+}
+
+#logo-bottom-cell{
+    background-color: #d0e3ea;
+    height: 42px;
+    float: left;
+    width: 226px;
+}
+
+/* =Menu
+-------------------------------------------------------------- */
+
+#menu-item-login{
+    float: right !important;
+    margin-right: 10px;
+}
+
+#menu-item-login .sub-menu{
+    margin-left: -40px !important;
+}
+
+#menu-item-login {;
+    border-top: 3px solid #4d92cd;
+    background-color: #D0E3EA;
+    margin-top: -3px;
+}
+
+#teacher-access{
+    float: right;
+}
+#access {
+	background: #edf6f3;
+	display: block;
+	margin: 0 auto;
+}
+#access .menu-header, div.menu {
+	font-size: 13px;
+	margin-left: 12px;
+	height: 42px;
+    font-weight: bold;
+}
+#access .menu-header ul, div.menu ul {
+	list-style: none;
+	margin: 0;
+}
+#access .menu-header li, div.menu li {
+	float: left;
+	position: relative;
+}
+#access a {
+	color: #000;
+	display: block;
+	line-height: 42px;
+	padding: 0 10px;
+	text-decoration: none;
+    font-weight: bold;
+}
+#access ul ul {
+	/*box-shadow: 0px 3px 3px rgba(0,0,0,0.2);
+	-moz-box-shadow: 0px 3px 3px rgba(0,0,0,0.2);
+	-webkit-box-shadow: 0px 3px 3px rgba(0,0,0,0.2);*/
+	display: none;
+	position: absolute;
+	top: 38px;
+	left: 0;
+	float: left;
+	width: 180px;
+	z-index: 99999;
+}
+#access ul ul li {
+	min-width: 180px;
+}
+#access ul ul ul {
+	left: 77%;
+	top: 0;
+}
+#access ul ul a {
+	background: #c7d7d7;
+	line-height: 1em;
+	padding: 10px;
+	width: 160px;
+	height: auto;
+}
+#access li:hover > a,
+#access ul ul :hover > a {
+	background: #333;
+	color: #cccccc;
+}
+/*ilene added this*/
+#access li:hover a{
+    background: #c7d7d7;
+    color: black;
+}
+
+#access ul li:hover > ul {
+	display: block;
+    color: #ffffff;
+}
+
+#access ul li.current_page_item > a,
+#access ul li.current-menu-ancestor > a,
+#access ul li.current-menu-item > a,
+#access ul li.current-menu-parent > a {
+	color: #000;
+}
+
+
+#access ul li.current-menu-ancestor > a:hover {
+    color: #cccccc;
+}
+
+* html #access ul li.current_page_item a,
+* html #access ul li.current-menu-ancestor a,
+* html #access ul li.current-menu-item a,
+* html #access ul li.current-menu-parent a,
+* html #access ul li a:hover {
+	color: #cccccc;
+}
+
+.post-thumb{
+    float: left;
+    margin-right: 15px;
+}
+
+#post-content{
+    margin-bottom: 30px;
+}
+
+#author-avatar{
+    margin-bottom: 30px
+}
+
+#author-meta{
+    text-align: center;
+    float: left;
+    min-width: 300px;
+    width: 30%;
+    padding-top: 30px;
+    position: absolute;
+    border-right: 1px solid #cccccc;
+    height: 100%;
+}
+
+.post-content-author{
+    margin-left: 32%;
+    padding: 30px;
+    height: 500px;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+
+.author-post{
+    clear: both;
+    display: block;
+    border-bottom: 1px solid #cccccc;
+    padding: 20px;
+}
+
+.post-info{
+    font-size: 11px;
+    text-decoration:underline;
+}
+
+.post-info a{
+    text-decoration:underline;
+}
+
+#post-meta{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.cat-description{
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/** team landing page **/
+.student-team-header{
+    margin-top: 10px;
+    margin-bottom: 25px;
+}
+.student-team-header p{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.team-member {
+    border-radius: 3px;
+    border: 1px solid #cccccc;
+    box-shadow:  2px 2px 2px #888888;
+    float: left;
+    margin: 15px;
+    text-align: center;
+    padding: 5px;
+    font-size: 12px;
+    min-height: 160px;
+    width: 115px;
+}
+
+.team-members{
+    width: 320px;
+    float: left;
+    height: 100%;
+    border: 1px solid #cccccc;
+    border-radius:3px;
+    margin-right: 45px;
+    padding: 5px;
+}
+
+.team-progress{
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    padding: 5px;
+    margin-right: 20px;
+    margin-bottom: 35px;
+    overflow: hidden;
+}
+
+.progress-point{
+    border: 1px solid #cccccc;
+    float: left;
+    padding: 10px 5px 5px 15px;
+    width: 100px;
+    height: 50px;
+    margin: 5px;
+}
+
+.progress-point-completed{
+    background-color: #568c0a;
+}
+
+.team-submissions{
+    height: 345px;
+    overflow: hidden;
+    overflow-y: scroll;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    padding: 5px;
+    margin-right: 20px;
+}
+
+#comments{
+    margin-top: 15px;
+}
+#comments ul,
+#comments li{
+    list-style-type: none;
+}
+
+.comment-respond{
+    margin-top: 20px;
+}
+
+.comment-form-comment textarea{
+    resize: none;
+    width: 50%;
+    font-size: 15px;
+}
+
+.comments-title{
+    width: 95%;
+    border-bottom: 1px solid #cccccc;
+}
+
+.comment article{
+    margin: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ccc;
+    width: 50%;
+}
+
+.comment-content #comment-avatar img{
+    float: left;
+}
+
+.comment-content{
+    margin: 10px;
+}
+
+.delete-comment{
+    cursor: pointer;
+}
+
+.delete-comment:hover{
+    text-decoration: underline;
+}
+
+.clear{
+    clear: both;
+}
+
+/* widgets */
+.widget{
+    margin-bottom: 10px;
+}

@@ -1,0 +1,33 @@
+#udm {
+	display: none;
+}
+
+#noprintbox {
+	display: none;
+}
+
+.noprint {
+	display: none;
+}
+
+#leftnav {
+	display: none;
+}
+
+.leftphotocell
+	{
+	display: none;
+	}
+	
+img {
+	border: 0;
+}	
+
+.leftnavcell {
+	width: 10px;
+}
+
+#sidebardiv, #sidebardiv1, #sidebardiv2, #sidebardiv3 {
+	float: right;
+	width: 170px;
+}

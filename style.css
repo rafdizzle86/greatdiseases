@@ -1,0 +1,51 @@
+/*
+Theme Name: Great Diseases
+Theme URI: 
+Description: For Tufts Great Diseases site
+Author: TUFTS AT
+Author URI:  
+Tags: Great Diseases, Sackler
+*/
+
+
+img.centered {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	}
+
+img.alignright {
+	padding: 4px;
+	margin: 0 0 2px 7px;
+	display: inline;
+	}
+
+img.alignleft {
+	padding: 4px;
+	margin: 0 7px 2px 0;
+	display: inline;
+	}
+.alignleft {
+	float:left;
+	padding:2px 0 0 10px;
+	}
+.alignright {
+	float:right;
+	padding:2px 10px 0 5px;
+	}
+.wp-caption.alignleft {
+         float:left;
+         margin-left:0;
+         margin-right:5px;
+         }
+.wp-caption.aligncenter {
+         margin-left:auto;
+         margin-right:auto;
+         }
+.wp-caption.alignright {
+         float:right;
+         margin-left:5px;
+         margin-right:0;
+         }
+
+
