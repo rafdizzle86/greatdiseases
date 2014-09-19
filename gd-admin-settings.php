@@ -16,6 +16,7 @@ class GD_Settings_Page
         add_action( 'admin_notices', array( $this, 'show_settings_errors') );
         add_filter( 'pre_update_option_gd_progress_pts', array( $this, 'save_gd_progress_pts'), 10, 2 );
         add_action( 'wp_ajax_gd_add_new_choice', array( $this, 'gd_add_new_choice') );
+        add_action( 'wp_ajax_gd_delete_step_choice', array( $this, 'gd_delete_step_choice') );
         add_action( 'admin_head', array( &$this, 'admin_header' ) );
 
         if( is_admin() ){
@@ -238,6 +239,46 @@ class GD_Settings_Page
         echo '<input type="text" id="gd_step_title" name="gd_progress_pts[gd_step_title]" value="" />';
     }
 
+    /**
+     * Removes a choice from a decision tree step
+     */
+    public function gd_delete_step_choice(){
+        $nonce = $_POST[ 'gd_admin_nonce' ];
+        if( !wp_verify_nonce( $nonce, 'gd_add_new_choice' ) ){
+            header("HTTP/1.0 409 Security Check.");
+            exit;
+        }
+
+        if( empty( $_POST['postID'] ) ){
+            header("HTTP/1.0 409 Could not locate post ID.");
+            exit;
+        }
+
+        if( !isset( $_POST['choiceID'] ) ){
+            header("HTTP/1.0 409 Could not locate choice ID.");
+            exit;
+        }
+
+        $post_id = (int) $_POST['postID'];
+        $choice_id = (int) $_POST['choiceID'];
+
+        $gd_step_choices = get_post_meta( $post_id, '_gd_progress_pt_choices', true );
+
+        $success = false;
+        if( !empty( $gd_step_choices ) && is_array( $gd_step_choices ) ){
+            if( isset( $gd_step_choices[$choice_id] ) ){
+                unset( $gd_step_choices[$choice_id] );
+                $success = update_post_meta( $post_id, '_gd_progress_pt_choices', array_values($gd_step_choices) );
+            }
+        }
+
+        echo json_encode( array( 'success' => $success, 'post_id' => $post_id, 'choice_id_removed' => $choice_id ) );
+        exit;
+    }
+
+    /**
+     * Adds a new choice to a decision tree step
+     */
     public function gd_add_new_choice(){
         $nonce = $_POST[ 'gd_admin_nonce' ];
         if( !wp_verify_nonce( $nonce, 'gd_add_new_choice' ) ){
@@ -280,7 +321,7 @@ class GD_Settings_Page
 
         if( $result !== false ){
             $gd_list_table = new GD_Progress_Pts_Table();
-            $choice_html = $gd_list_table->render_progress_pt_choice( $new_choice, $choice_id, $post_id );
+            $choice_html = $gd_list_table->render_progress_pt_choice( $new_choice, $choice_id - 1, $post_id );
             echo $choice_html;
         }
         exit;

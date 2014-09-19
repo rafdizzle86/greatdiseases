@@ -35,7 +35,7 @@
                 alert('Error: could render choices, invalid postID!');
                 return;
             }
-
+            var self = this;
             var gd_admin_nonce = $('#gd_admin_nonce').val();
             $.ajax({
                 url: ajaxurl,
@@ -54,7 +54,11 @@
                         existingChoices.append('<p><b>Existing Choices:</b></p>' + data);
                     }else{
                         existingChoices.append(data);
+                        var deleteElemID = $(data).find('.delete-choice').attr('id');
+                        self.bindDeleteChoice( $('#' + deleteElemID ) );
                     }
+                    // clear input
+                    $('#new-progress-pt-choice-title-' + postID).val("");
                 },
                 error: function(jqXHR, textStatus, errorThrown){
                     alert(errorThrown)
@@ -62,6 +66,46 @@
             });
         },
 
+        /**
+         * Binds click even to deleteChoiceElem an calls deleteStepChoice
+         * @param deleteChoiceElem
+         */
+        bindDeleteChoice: function(deleteChoiceElem){
+            var self = this;
+            deleteChoiceElem.click( function(){
+                var postID = $(this).data( 'postid' );
+                var choiceID = $(this).data( 'choiceid' );
+                self.deleteStepChoice( choiceID, postID );
+            });
+        },
+        /**
+         * Given a choice ID and step ID, removes the choice from the step ID's
+         * post meta with choice ID
+         * @param choiceID
+         * @param postID
+         */
+        deleteStepChoice: function( choiceID, postID ){
+            var gd_admin_nonce = $('#gd_admin_nonce').val();
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action : 'gd_delete_step_choice',
+                    gd_admin_nonce : gd_admin_nonce,
+                    postID : postID,
+                    choiceID : choiceID
+                },
+                success: function(data, textStatus, jqXHR){
+                    if( data.success ){
+                        $('#choice-' + choiceID + '-' + postID).fadeOut().remove();
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                    alert(errorThrown)
+                }
+            });
+        },
         /**
          * Binds click event to the saveChoicesSettings element
          * @param saveChoiceSettingsElem
@@ -82,6 +126,7 @@
         init: function(){
             this.bindEditChoices( $('.edit-gd-choice-inline') );
             this.bindAddNewChoice( $( '.new-progress-pt-choice' ) );
+            this.bindDeleteChoice( $('.delete-choice') );
         }
     };
 

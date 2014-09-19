@@ -72,19 +72,61 @@
                 <div class="content">
                     <div id="post-thumb-<?php the_ID() ?>" class="post-thumb"><?php the_post_thumbnail( array(100, 100) ); ?></php></div>
                     <?php
+
+
+                    $team_id = 0;
+                    if( is_user_logged_in() ){
+                        if( class_exists( 'CTXPS_Queries') ){
+                            $groups = CTXPS_Queries::get_groups( get_current_user_id() );
+                            $current_group = new stdClass();
+
+                            // get the first group id if there are multiple groups
+                            if( count( $groups ) > 0 ){
+                                $current_group = $groups[0];
+                            }
+                            $team_id = $current_group->ID;
+                        }
+                    }
+
+                    $show_choices = true;
+                    if( $team_id > 0 ){
+                        // Show choices only if there is a submitted post and the current step is a milestone step
+                        // @todo: This binds "Milestone" steps with required submissions
+                        $is_milestone = (bool) get_post_meta( get_the_ID(), '_gd_is_milestone', true );
+                        $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
+
+                        if( !isset( $team_progress[ get_the_ID() ] ) && $is_milestone ){
+                            $show_choices = false;
+                        }
+
+                        if( isset( $team_progress[ get_the_ID() ] ) && $is_milestone ){
+                            $progress_post_id = $team_progress[ get_the_ID() ];
+                            $progress_post = get_post( $progress_post_id );
+
+                            if( $progress_post->post_status == 'publish' ){
+                                $show_choices = true;
+                            }else{
+                                $show_choices = false;
+                            }
+                        }
+                    }
+
                     if( is_single() || is_page() ){
                         the_content();
                     }else{
                         the_excerpt();
                     }
-                    $step_choices = get_post_meta( get_the_ID(), '_gd_progress_pt_choices', true);
-                    if( !empty( $step_choices ) ){
-                        echo '<div class="gd-choices">';
-                        foreach( $step_choices as $choice ){
-                            $goto_permalink = get_permalink( $choice['choice_goto_id'] );
-                            echo '<a href="' . $goto_permalink . '"><span class="gd-choice">' . $choice['choice_title'] . '<span></a>';
+
+                    if( $show_choices ){
+                        $step_choices = get_post_meta( get_the_ID(), '_gd_progress_pt_choices', true);
+                        if( !empty( $step_choices ) ){
+                            echo '<div class="gd-choices">';
+                            foreach( $step_choices as $choice ){
+                                $goto_permalink = get_permalink( $choice['choice_goto_id'] );
+                                echo '<a href="' . $goto_permalink . '"><span class="gd-choice">' . $choice['choice_title'] . '<span></a>';
+                            }
+                            echo '</div>';
                         }
-                        echo '</div>';
                     }
                     ?>
                     <div class="clear"></div>

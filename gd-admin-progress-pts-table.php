@@ -51,7 +51,7 @@ class GD_Progress_Pts_Table extends WP_List_Table {
             $choice_form .= '<div id="gd-progress-pt-existing-choices-' . $progress_pt_id .'" class="gd-progress-pt-existing-choices">';
                 $choice_form .= $this->render_progress_pt_choices( $progress_pt_id, '<p><b>Existing Choices:</b></p><form id="choice-form-' . $progress_pt_id  .'">', '</form>' );
             $choice_form .= '</div>';
-            $choice_form .= '<button id="save-progress-pt-choice-settings-' . $progress_pt_id .'" data-postid="' . $progress_pt_id .'" class="save-progress-pt-choice-settings button button-primary" type="button">Save changes</button>';
+            //$choice_form .= '<button id="save-progress-pt-choice-settings-' . $progress_pt_id .'" data-postid="' . $progress_pt_id .'" class="save-progress-pt-choice-settings button button-primary" type="button">Save changes</button>';
 
         $choice_form .= '</div>';
 
@@ -82,7 +82,7 @@ class GD_Progress_Pts_Table extends WP_List_Table {
      * @return string
      */
     function render_progress_pt_choice( $choice, $choice_id, $progress_pt_id ){
-        $choice_html = '<p id="choice-' . $choice_id .'" class="gd-progress-pt-choice">';
+        $choice_html = '<p id="choice-' . $choice_id .'-' . $progress_pt_id . '" class="gd-progress-pt-choice">';
             $choice_html .= 'Text: <input type="text" id="choice-text-' . $choice_id . '" value="' . $choice['choice_title'] . '"> ';
             $delete_choice = ' <span id="delete-choice-' . $choice_id . '" class="delete-choice delete" data-choiceid="' . $choice_id . '" data-postid="' . $progress_pt_id . '">Delete</span>';
             $choice_html .= $this->render_progress_pts_dropdown( 'choice-goto-' . $choice_id, 'Goes to step: ', $choice['choice_goto_id'], $delete_choice);
@@ -111,8 +111,10 @@ class GD_Progress_Pts_Table extends WP_List_Table {
 
             foreach( $gd_progress_pts as $progress_pt_id ){
                 $progress_pt_post = get_post( $progress_pt_id );
+                $meta_data = get_post_meta( $progress_pt_id, '_gd_step_metadata', true );
+                $meta_data = !empty( $meta_data ) ? '(' . $meta_data . ')' : '';
                 $selected = $progress_pt_id == $select_id ? 'selected' : '';
-                $drop_down_html .= '<option id="progress-pt-' . $progress_pt_id .'" value="' . $progress_pt_id . '" ' . $selected . '>' . $progress_pt_post->post_title . '</option>';
+                $drop_down_html .= '<option id="progress-pt-' . $progress_pt_id .'" value="' . $progress_pt_id . '" ' . $selected . '>' . $progress_pt_post->post_title . ' ' . $meta_data . '</option>';
             }
 
             $drop_down_html .= '</select>';

@@ -4,55 +4,86 @@ include_once( 'gd-admin-settings.php' );
 
 /**
  * 1. Get the current user's team id
- * 2. Get the category (i.e. progress point) that the post was submitted from
- * 3. Set this post as the "designated" post for the retrieved progress point
+ * 2. Get the step/progress point that the post was submitted from
+ * 3. Update step post_meta to show:
+ *    - The team ID of the user's team
+ *    - The user ID that has submitted the content
+ *    - The post ID that was submitted
+ * 4. Update the team progress option
  */
-function gd_check_progress_point( $sp_post ){
+function gd_check_progress_point( $sp_post_id ){
 
-    // get the current user's team id
-    $team_id = 0;
-    if( class_exists( 'CTXPS_Queries' ) ){
-        $groups = CTXPS_Queries::get_groups( get_current_user_id() );
-        $current_group = new stdClass();
-        if( count( $groups ) > 0 ){
-            $current_group = $groups[0];
-        }
-        $team_id = $current_group->ID;
-    }
+    // get the origin object id of the submitted smartpost and see if it's a progress point
+    $post = get_post( $sp_post_id );
+    $origin_obj_id = get_post_meta( $post->ID, 'sp_origin_id', true );
 
-    // get the category that the post was submitted from
-    $post = $sp_post->get_wp_post();
-    $post_cats = get_the_category( $post->ID );
-    $post_cat = $post_cats[0];
+    $gd_progress_pts = get_option( 'gd_progress_pts' );
 
-    // compare post cat with the progress point cat id
-    $gd_progress_pts = get_option( 'gd-progress-pts' );
-    $progress_pt_id = 0; // if this ends up being > 0, then they've made progress
-    if( is_array( $gd_progress_pts ) && !empty( $gd_progress_pts ) ){
-        foreach( $gd_progress_pts as $pt_key => $pt_label ){
-            $cat_obj = get_term_by( 'name', $pt_label, 'category' );
-            if( $cat_obj->term_id == $post_cat->term_id ){
-                $progress_pt_id = $pt_key;
-                break;
+    if( ( $progress_pt_key = array_search( $origin_obj_id, $gd_progress_pts ) ) !== false ){
+
+        $progress_pt_id = $gd_progress_pts[ $progress_pt_key ];
+
+        // get the current user's team id
+        $team_id = 0;
+        if( class_exists( 'CTXPS_Queries' ) ){
+            $groups = CTXPS_Queries::get_groups( get_current_user_id() );
+            $current_group = new stdClass();
+            if( count( $groups ) > 0 ){
+                $current_group = $groups[0];
             }
+            $team_id = $current_group->ID;
         }
-    }
 
-    // if they've submitted a progress point, set the post as the progress pt "post"
-    if( $progress_pt_id > 0 && $team_id > 0 ){
-        $team_progress_option_id =  'gd-team-' . $team_id . '-progress';
-        $team_progress = get_option( $team_progress_option_id );
-        /**
-         * Team progress array format
-         * array(
-         *   [progress pt id] => [post object]
-         * )
-         */
-        $team_progress[ $progress_pt_id ] = $post->ID;
-        update_option( $team_progress_option_id, $team_progress );
+        // if they've submitted a progress point, set the post as the progress pt "post"
+        if( $progress_pt_id > 0 && $team_id > 0 ){
+            // Set team progress pt
+            $team_progress_option_id =  'gd-team-' . $team_id . '-progress';
+            $team_progress = get_option( $team_progress_option_id );
+            $team_progress[ $progress_pt_id ] = $post->ID;
+            update_option( $team_progress_option_id, $team_progress );
+        }
     }
 }
-add_action( 'sp_after_new_sp_post', 'gd_check_progress_point', 10, 1 );
+add_action( 'sp_qp_widget_ajax_new_draft', 'gd_check_progress_point', 10, 1 );
+
+/**
+ * Cleans the team progress option of cancelled posts
+ * @param $post_id
+ */
+function gd_check_deleted_posts( $post_id ){
+
+    $post = get_post( $post_id );
+    $origin_obj_id = get_post_meta( $post->ID, 'sp_origin_id', true );
+    $gd_progress_pts = get_option( 'gd_progress_pts' );
+
+    if( ( $progress_pt_key = array_search( $origin_obj_id, $gd_progress_pts ) ) !== false ){
+
+        $progress_pt_id = $gd_progress_pts[ $progress_pt_key ];
+        // get the current user's team id
+        $team_id = 0;
+        if( class_exists( 'CTXPS_Queries' ) ){
+            $groups = CTXPS_Queries::get_groups( get_current_user_id() );
+            $current_group = new stdClass();
+            if( count( $groups ) > 0 ){
+                $current_group = $groups[0];
+            }
+            $team_id = $current_group->ID;
+        }
+
+        $team_progress_option_id =  'gd-team-' . $team_id . '-progress';
+        $team_progress = get_option( $team_progress_option_id );
+
+        if( isset( $team_progress[ $progress_pt_id] ) ){
+
+            // remove the submission post id for the progress point
+            unset( $team_progress[ $progress_pt_id ] );
+            update_option( $team_progress_option_id, $team_progress );
+
+        }
+    }
+}
+add_action( 'sp_qp_widget_before_after_post', 'gd_check_deleted_posts', 10, 1);
+add_action( 'before_delete_post', 'gd_check_deleted_posts', 10, 1 );
 
 /**
  * Adds a box to the main column on the Post and Page edit screens.
