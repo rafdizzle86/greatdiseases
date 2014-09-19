@@ -5,7 +5,7 @@
          * Binds click event to deleteButton and
          * calls deleteComment() to delete hte comment.
          */
-        bindDeleteComment: function(deleteElem){
+        bindEditChoices: function(deleteElem){
             var self = this;
             deleteElem.click(function(){
                 var commentID = $(this).data('commentid');
@@ -46,7 +46,7 @@
             }
         },
         init: function(){
-            this.bindDeleteComment( $('.delete-comment') );
+            this.bindEditChoices( $('.delete-comment') );
         }
     };
 

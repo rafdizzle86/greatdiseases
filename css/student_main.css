@@ -698,6 +698,31 @@ img.alignleft {
     clear: both;
 }
 
+.gd-choices{
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.gd-choice:hover{
+    background-color: #9ab0cd;
+}
+
+.gd-choice{
+    background-color: #4d92cd;
+    color: white;
+    font-weight: bold;
+    display: inline-block;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    padding: 15px;
+    margin: 20px;
+}
+.gd-choice a{
+    color: white;
+    text-decoration: none;
+}
+
 /* widgets */
 .widget{
     margin-bottom: 10px;

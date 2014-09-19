@@ -128,7 +128,7 @@
                                     $pt_title = '<a href="' . get_permalink( $progress_post->ID ) . '">' . $pt_title . '</a>';
                                 }
                                 */
-                                $is_milestone = (bool) get_post_meta( $progress_pt_id, '_is_gd_milestone', true );
+                                $is_milestone = (bool) get_post_meta( $progress_pt_id, '_gd_is_milestone', true );
                                 if( is_object( $progress_pt_page ) && $is_milestone ){
                                 ?>
                                     <div id="<?php echo $progress_pt_page->ID ?>-<?php echo $progress_pt_page->post_title ?>" class="<?php echo $progress_class ?>">
