@@ -3,6 +3,77 @@
 include_once( 'gd-admin-settings.php' );
 
 /**
+ * Records the decision of each step
+ */
+
+function gd_record_decision(){
+    $nonce = $_POST[ 'gd_nonce' ];
+    if( !wp_verify_nonce( $nonce, 'gd_record_decision' ) ){
+        header("HTTP/1.0 409 Security Check.");
+        exit;
+    }
+
+    if( empty( $_POST['stepID'] ) ){
+        header("HTTP/1.0 409 Could not locate post ID.");
+        exit;
+    }
+
+    if( !isset( $_POST['choiceID'] ) ){
+        header("HTTP/1.0 409 Could not locate choice ID.");
+        exit;
+    }
+
+    $progress_pt_id = (int) $_POST['stepID'];
+    $choice_id = (int) $_POST['choiceID'];
+
+    $team_id = gd_get_current_users_team_id();
+    if( $team_id > 0  && is_user_logged_in() ){
+        $team_progress_option_id =  'gd-team-' . $team_id . '-progress';
+        $team_progress = get_option( $team_progress_option_id );
+
+        // record the team decision
+        // @todo: how to handle multiple users? Right now it'll work with just one user
+        if( !isset( $team_progress['decisions'] ) ){
+            $team_progress['decisions'] = array();
+        }
+
+        // Get the available choices
+        $choices = get_post_meta( $progress_pt_id, '_gd_progress_pt_choices', true );
+
+        $decision = new stdClass();
+        $decision->user_id = get_current_user_id();
+        $decision->step_id = $progress_pt_id;
+        $decision->choice_made = $choices[ $choice_id ]['choice_title'];
+        $decision->step_title = get_the_title( $progress_pt_id );
+
+        $team_progress['decisions'][$progress_pt_id] = $decision;
+        update_option( $team_progress_option_id, $team_progress );
+
+        echo json_encode( array( 'decision' => $decision, 'url' => get_permalink( $choices[$choice_id]['choice_goto_id'] ) ) );
+    }
+    exit;
+}
+add_action( 'wp_ajax_gd_record_decision', 'gd_record_decision' );
+
+/**
+ * Gets the current user's team id
+ * @return int
+ */
+function gd_get_current_users_team_id(){
+    // get the current user's team id
+    $team_id = 0;
+    if( class_exists( 'CTXPS_Queries' ) ){
+        $groups = CTXPS_Queries::get_groups( get_current_user_id() );
+        $current_group = new stdClass();
+        if( count( $groups ) > 0 ){
+            $current_group = $groups[0];
+        }
+        $team_id = $current_group->ID;
+    }
+    return $team_id;
+}
+
+/**
  * 1. Get the current user's team id
  * 2. Get the step/progress point that the post was submitted from
  * 3. Update step post_meta to show:
@@ -39,7 +110,7 @@ function gd_check_progress_point( $sp_post_id ){
             // Set team progress pt
             $team_progress_option_id =  'gd-team-' . $team_id . '-progress';
             $team_progress = get_option( $team_progress_option_id );
-            $team_progress[ $progress_pt_id ] = $post->ID;
+            $team_progress[ $progress_pt_id ] = array( 'step_submission', $post->ID );
             update_option( $team_progress_option_id, $team_progress );
         }
     }
