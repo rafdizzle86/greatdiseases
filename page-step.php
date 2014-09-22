@@ -121,10 +121,11 @@
                         $step_choices = get_post_meta( get_the_ID(), '_gd_progress_pt_choices', true);
                         if( !empty( $step_choices ) ){
                             echo '<div class="gd-choices">';
-                            foreach( $step_choices as $choice ){
+                            foreach( $step_choices as $choice_id => $choice ){
                                 $goto_permalink = get_permalink( $choice['choice_goto_id'] );
-                                echo '<a href="' . $goto_permalink . '"><span class="gd-choice">' . $choice['choice_title'] . '<span></a>';
+                                echo '<a href="' . $goto_permalink . '"><span class="gd-choice" data-choiceid="' . $choice_id .'" data-stepid="' . get_the_ID() . '">' . $choice['choice_title'] . '<span></a>';
                             }
+                            wp_nonce_field( 'gd_record_decision', 'gd_decision_step' );
                             echo '</div>';
                         }
                     }

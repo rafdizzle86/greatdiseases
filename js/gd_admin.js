@@ -8,7 +8,7 @@
          * Binds click event to deleteButton and
          * calls deleteComment() to delete hte comment.
          */
-        bindEditChoices: function(editChoicesElem){
+        bindDeleteComment: function(editChoicesElem){
             editChoicesElem.click(function(){
                 var postID = $(this).data( 'postid' );
                 $( '#gd-progress-pt-choices-' + postID ).fadeToggle();
@@ -124,7 +124,7 @@
         },
 
         init: function(){
-            this.bindEditChoices( $('.edit-gd-choice-inline') );
+            this.bindDeleteComment( $('.edit-gd-choice-inline') );
             this.bindAddNewChoice( $( '.new-progress-pt-choice' ) );
             this.bindDeleteChoice( $('.delete-choice') );
         }

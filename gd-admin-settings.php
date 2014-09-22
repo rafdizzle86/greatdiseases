@@ -176,12 +176,6 @@ class GD_Settings_Page
      */
     public function save_gd_progress_pts( $new_value, $old_value ){
 
-        if( $_GET['action'] == 'delete' ){
-            error_log( 'new value' . print_r( $new_value , true ) );
-            error_log( 'old value' . print_r( $old_value , true ) );
-            return $old_value;
-        }
-
         $gd_progress_pts = get_option( 'gd_progress_pts' );
 
         if( empty( $gd_progress_pts ) || !is_array( $gd_progress_pts ) ){
@@ -325,6 +319,36 @@ class GD_Settings_Page
             echo $choice_html;
         }
         exit;
+    }
+
+    /**
+     * Returns an array of post IDs
+     * @param $meta_key
+     * @param $meta_value
+     * @return array
+     */
+    public function gd_get_progress_pts_by_metadata( $meta_key, $meta_value ){
+
+        $gd_progress_pts = get_option( 'gd_progress_pts' );
+
+        $gd_query_args = array(
+            'post_type' => 'page',
+            'post_status' => 'publish',
+            'post__in' => $gd_progress_pts,
+            'posts_per_page' => -1,
+            'meta_value' => $meta_value,
+            'meta_key' => $meta_key
+        );
+
+        $gd_query = new WP_Query( $gd_query_args );
+        $gd_progress_pts_filtered = array();
+        if ( $gd_query->have_posts() ) {
+            while ( $gd_query->have_posts() ) {
+                $gd_query->the_post();
+                array_push( $gd_progress_pts_filtered, get_the_ID() );
+            }
+        }
+        return $gd_progress_pts_filtered;
     }
 
 }

@@ -115,19 +115,22 @@
                         <h2>Team Progress:</h2>
                         <?php
                         $progress_pts = get_option( 'gd_progress_pts' );
-                        $team_progress =  get_option( 'gd-team-' . $team_id . '-progress' );
+                        $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
 
                         if( is_array( $progress_pts ) && !empty( $progress_pts ) ){
                             foreach( $progress_pts as $progress_pt_id ){
                                 $progress_pt_page = get_post( $progress_pt_id );
                                 $progress_class = 'progress-point';
-                                /*
-                                if( isset( $team_progress[ $pt_key ] ) ){
-                                    $progress_post = get_post( $team_progress[ $pt_key ] );
-                                    $progress_class = 'progress-point progress-point-completed';
-                                    $pt_title = '<a href="' . get_permalink( $progress_post->ID ) . '">' . $pt_title . '</a>';
+
+                                if( isset( $team_progress[ $progress_pt_id ] ) ){
+                                    $submission_post_id = $team_progress[ $progress_pt_id ];
+                                    $progress_post = get_post( $submission_post_id );
+
+                                    if( $progress_post->post_status == 'publish' ){
+                                        $progress_class = 'progress-point progress-point-completed';
+                                    }
                                 }
-                                */
+
                                 $is_milestone = (bool) get_post_meta( $progress_pt_id, '_gd_is_milestone', true );
                                 if( is_object( $progress_pt_page ) && $is_milestone ){
                                 ?>
@@ -226,7 +229,10 @@
 
                     <?php } //end membership check ?>
                 <?php } //if CTXPS is enabled  ?>
-            <?php } // use is logged in check ?>
+
+            <?php } // use is logged in check
+            print_r( $team_progress );
+            ?>
 
             <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
                 <?php // show the page content if there is content to be shown ?>

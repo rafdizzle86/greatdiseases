@@ -1,11 +1,49 @@
 ( function( $ ){
     // Great Diseases JS object
     var gd = {
+
+        bindChoiceClick: function(choiceElem){
+            var self = this;
+            choiceElem.click(function(){
+                var choice_id = $(this).data('choiceid');
+                var step_id = $(this).data('stepid');
+                self.recordDecision( choice_id, step_id );
+                return false;
+            });
+        },
+
+        /**
+         * Records a decision/choice taken by a user
+         * @param choice_id
+         * @param step_id
+         */
+        recordDecision: function(choice_id, step_id){
+            var gd_nonce = $('#gd_decision_step').val();
+            $.ajax({
+                url: ajaxurl,
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action : 'gd_record_decision',
+                    choiceID : choice_id,
+                    stepID: step_id,
+                    gd_nonce : gd_nonce
+                },
+                success: function(data, textStatus, jqXHR){
+                    if( data.url ){
+                        window.location.replace( data.url );
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                    alert(errorThrown)
+                }
+            });
+        },
         /**
          * Binds click event to deleteButton and
          * calls deleteComment() to delete hte comment.
          */
-        bindEditChoices: function(deleteElem){
+        bindDeleteComment: function(deleteElem){
             var self = this;
             deleteElem.click(function(){
                 var commentID = $(this).data('commentid');
@@ -46,7 +84,8 @@
             }
         },
         init: function(){
-            this.bindEditChoices( $('.delete-comment') );
+            this.bindDeleteComment( $('.delete-comment') );
+            this.bindChoiceClick( $( '.gd-choice' ) );
         }
     };
 
