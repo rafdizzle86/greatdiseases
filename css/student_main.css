@@ -622,16 +622,15 @@ img.alignleft {
     padding: 5px;
     margin-right: 20px;
     margin-bottom: 35px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 130px;
+    white-space: nowrap;
 }
 
 .progress-point{
-    border: 1px solid #cccccc;
-    float: left;
-    padding: 10px 5px 5px 15px;
-    width: 100px;
-    height: 50px;
-    margin: 5px;
+    margin-top: 25px;
+    margin-bottom: 25px;
 }
 
 .progress-point-completed{
@@ -723,7 +722,105 @@ img.alignleft {
     text-decoration: none;
 }
 
+.gd-submission h2 {
+    margin: 20px;
+}
+
+.gd-submission{
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #cccccc;
+}
+
 /* widgets */
 .widget{
     margin-bottom: 10px;
+}
+
+/* progress tracker */
+.progress-meter {
+    padding: 0;
+}
+
+ol.progress-meter a{
+    position: absolute;
+    top: 0;
+    left: 0%;
+    white-space: normal;
+    width: 250px;
+}
+
+ol.progress-meter {
+    padding-bottom: 9.5px;
+    list-style-type: none;
+}
+ol.progress-meter li {
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    height: 35px;
+    width: 250px;
+    font-size: 12px;
+    border-bottom-width: 4px;
+    border-bottom-style: solid;
+    padding-bottom: 10px;
+    margin-right: -6px;
+
+    /*overflow: hidden;*/
+}
+ol.progress-meter li:before {
+    position: relative;
+    float: left;
+    text-indent: 0;
+    left: -webkit-calc(50% - 9.5px);
+    left: -moz-calc(50% - 9.5px);
+    left: -ms-calc(50% - 9.5px);
+    left: -o-calc(50% - 9.5px);
+    left: calc(50% - 9.5px);
+}
+ol.progress-meter li.done {
+    font-size: 12px;
+}
+ol.progress-meter li.done:before {
+    content: "\2713";
+    height: 19px;
+    width: 19px;
+    line-height: 21.85px;
+    bottom: -36.95px;
+    border: none;
+    border-radius: 19px;
+}
+ol.progress-meter li.todo {
+    font-size: 12px;
+}
+ol.progress-meter li.todo:before {
+    content: "\2B24";
+    font-size: 17.1px;
+    bottom: -36.95px;
+    line-height: 18.05px;
+}
+ol.progress-meter li.done {
+    color: black;
+    border-bottom-color: yellowgreen;
+}
+ol.progress-meter li.done:before {
+    color: white;
+    background-color: yellowgreen;
+}
+ol.progress-meter li.todo {
+    color: silver;
+    border-bottom-color: silver;
+}
+ol.progress-meter li.todo:before {
+    color: silver;
+}
+
+/* Article style */
+article {
+    float: left;
+    width: 45%;
+    height: 245px;
+    border-bottom: 1px solid #ccc;
+    margin: 20px;
+    position: relative;
 }

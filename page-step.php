@@ -88,6 +88,12 @@
                         }
                     }
 
+                    if( is_single() || is_page() ){
+                        the_content();
+                    }else{
+                        the_excerpt();
+                    }
+
                     $show_choices = true;
                     if( $team_id > 0 ){
                         // Show choices only if there is a submitted post and the current step is a milestone step
@@ -99,11 +105,26 @@
                             $show_choices = false;
                         }
 
+                        // Show the submitted post if it exists
                         if( isset( $team_progress[ get_the_ID() ] ) && $is_milestone ){
                             $progress_post_id = $team_progress[ get_the_ID() ];
-                            $progress_post = get_post( $progress_post_id );
+                            $wp_progress_post = get_post( $progress_post_id );
+                            if( $wp_progress_post->post_status == 'publish' ){
 
-                            if( $progress_post->post_status == 'publish' ){
+                                $sp_post_comps = sp_post::get_components_from_ID( $progress_post_id );
+                                if( !empty($sp_post_comps) ){
+                                    global $wp_query;
+                                    $wp_query->is_single = true;
+                                    echo '<div id="gd-submission-' . $wp_progress_post->ID . '" class="gd-submission">';
+                                    echo '<h1>Team submission:</h1>';
+                                    echo '<h2>' . $wp_progress_post->post_title . '</h2>';
+                                    foreach( $sp_post_comps as $post_comp ){
+                                        echo $post_comp->render( true );
+                                    }
+                                    echo '</div>';
+                                    $wp_query->is_single = false;
+                                }
+
                                 $show_choices = true;
                             }else{
                                 $show_choices = false;
@@ -111,19 +132,23 @@
                         }
                     }
 
-                    if( is_single() || is_page() ){
-                        the_content();
-                    }else{
-                        the_excerpt();
-                    }
-
                     if( $show_choices ){
                         $step_choices = get_post_meta( get_the_ID(), '_gd_progress_pt_choices', true);
                         if( !empty( $step_choices ) ){
                             echo '<div class="gd-choices">';
+                            echo '<h2>Congrats! You\'ve submitted your argument, now you can confirm your decision by clicking on the choice you\'ve made:</h2>';
+
+                            // Filters steps before they are shown
+                            $gd_steps = apply_filters( 'gd_step_html', $step_choices );
+
                             foreach( $step_choices as $choice_id => $choice ){
                                 $goto_permalink = get_permalink( $choice['choice_goto_id'] );
-                                echo '<a href="' . $goto_permalink . '"><span class="gd-choice" data-choiceid="' . $choice_id .'" data-stepid="' . get_the_ID() . '">' . $choice['choice_title'] . '<span></a>';
+                                $step_html = '<a href="' . $goto_permalink . '"><span class="gd-choice" data-choiceid="' . $choice_id .'" data-stepid="' . get_the_ID() . '">' . $choice['choice_title'] . '<span></a>';
+
+                                // Filters the step before it is echoed
+                                $step_html = apply_filters( 'gd_step_pre_echo', $step_html );
+
+                                echo $step_html;
                             }
                             wp_nonce_field( 'gd_record_decision', 'gd_decision_step' );
                             echo '</div>';

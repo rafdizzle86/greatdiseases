@@ -110,7 +110,7 @@ function gd_check_progress_point( $sp_post_id ){
             // Set team progress pt
             $team_progress_option_id =  'gd-team-' . $team_id . '-progress';
             $team_progress = get_option( $team_progress_option_id );
-            $team_progress[ $progress_pt_id ] = array( 'step_submission', $post->ID );
+            $team_progress[ $progress_pt_id ] = $post->ID;
             update_option( $team_progress_option_id, $team_progress );
         }
     }

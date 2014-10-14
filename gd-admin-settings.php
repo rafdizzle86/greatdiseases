@@ -17,6 +17,7 @@ class GD_Settings_Page
         add_filter( 'pre_update_option_gd_progress_pts', array( $this, 'save_gd_progress_pts'), 10, 2 );
         add_action( 'wp_ajax_gd_add_new_choice', array( $this, 'gd_add_new_choice') );
         add_action( 'wp_ajax_gd_delete_step_choice', array( $this, 'gd_delete_step_choice') );
+        add_action( 'wp_ajax_gd_set_step_order', array( $this, 'gd_set_step_order') );
         add_action( 'admin_head', array( &$this, 'admin_header' ) );
 
         if( is_admin() ){
@@ -200,6 +201,7 @@ class GD_Settings_Page
         }
 
         add_post_meta( $step_id, '_gd_step_metadata', $new_value['gd_step_metadata'], true );
+        add_post_meta( $step_id, '_gd_step_order', count( $gd_progress_pts ), true );
 
         array_push( $gd_progress_pts, $step_id );
 
@@ -267,6 +269,33 @@ class GD_Settings_Page
         }
 
         echo json_encode( array( 'success' => $success, 'post_id' => $post_id, 'choice_id_removed' => $choice_id ) );
+        exit;
+    }
+
+    /**
+     * Sets the order of the steps
+     */
+    function gd_set_step_order(){
+        $nonce = $_POST[ 'gd_admin_nonce' ];
+        if( !wp_verify_nonce( $nonce, 'gd_add_new_choice' ) ){
+            header("HTTP/1.0 409 Security Check.");
+            exit;
+        }
+
+        if( empty( $_POST['step_order'] ) ){
+            header("HTTP/1.0 409 Could not locate step order.");
+            exit;
+        }
+
+        $step_order = $_POST['step_order'];
+
+        if( !empty( $step_order ) && is_array( $step_order ) ){
+            foreach( $step_order as $step_key => $step_id ){
+                update_post_meta( $step_id, '_gd_step_order', $step_key );
+            }
+        }
+
+        echo json_encode( $step_order );
         exit;
     }
 

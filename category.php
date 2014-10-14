@@ -36,6 +36,7 @@
                 <?php if( is_page() ) { ?>
                     <h3><?php the_title(); ?></h3>
                 <?php } else { ?>
+                    <article id="post-<?php the_ID() ?>">
                     <h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
                         <br />
                         <small style="font-weight:normal;">Posted on <?php the_date(); ?> by <?php the_author_posts_link(); ?> | Categories: <?php the_category(', ')   ;   ?>
@@ -65,7 +66,11 @@
                 <?php } ?>
 
                 <div class="content">
-                    <div id="post-thumb-<?php the_ID() ?>" class="post-thumb"><?php the_post_thumbnail( array(100, 100) ); ?></php></div>
+                    <div id="post-thumb-<?php the_ID() ?>" class="post-thumb">
+                        <a href="<?php the_permalink() ?>">
+                            <?php the_post_thumbnail( array(100, 100) ); ?>
+                        </a>
+                    </div>
                     <?php
                     if( is_single() || is_page() ){
                         the_content();
@@ -74,9 +79,11 @@
                     }
                     ?>
                 </div>
+                <div class="clear"></div>
                 <div id="post-meta">
-                    <div id="breadcrumbdivider">&nbsp;</div>
+                    <p><?php edit_post_link(); ?></p>
                 </div>
+                </article>
             <?php endwhile; endif; ?>
         </div><!-- end #post-content -->
     </div><!-- end #content-wrapper -->

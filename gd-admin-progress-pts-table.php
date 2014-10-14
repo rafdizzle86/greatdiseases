@@ -35,6 +35,23 @@ class GD_Progress_Pts_Table extends WP_List_Table {
     }
 
     /**
+     * Generates content for a single row of the table
+     *
+     * @since 3.1.0
+     * @access protected
+     *
+     * @param object $item The current item
+     */
+    function single_row( $item ) {
+        static $row_class = '';
+        $row_class = ( $row_class == '' ? ' class="alternate"' : '' );
+
+        echo '<tr id="' . $item->ID . '" ' . $row_class . '>';
+        $this->single_row_columns( $item );
+        echo '</tr>';
+    }
+
+    /**
      * Renders the progress point choices
      * @param $progress_pt_id
      * @return string
@@ -313,6 +330,13 @@ class GD_Progress_Pts_Table extends WP_List_Table {
                         'meta_key' => '_gd_step_metadata'
                     );
                     break;
+
+
+                default:
+                    $orderby_args = array(
+                        'orderby' => 'meta_value_num',
+                        'meta_key' => '_gd_step_order'
+                    );
             }
 
             $gd_query_args = array(

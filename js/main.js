@@ -84,8 +84,14 @@
             }
         },
         init: function(){
+
             this.bindDeleteComment( $('.delete-comment') );
             this.bindChoiceClick( $( '.gd-choice' ) );
+
+            // hide the quickpost widget if we're displaying a submitted post
+            if( $('.gd-submission').length > 0 ){
+                $('.sp-qp-new-post').hide();
+            }
         }
     };
 

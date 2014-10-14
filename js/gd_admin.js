@@ -124,6 +124,33 @@
         },
 
         init: function(){
+
+            // Make admin table sortable
+            $('.gd_list_progress_pts #the-list').sortable({
+                stop: function( event, ui ){
+                    var sortedIDs = $( ".gd_list_progress_pts #the-list" ).sortable( "toArray" );
+                    var gd_admin_nonce = $('#gd_admin_nonce').val();
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action : 'gd_set_step_order',
+                            gd_admin_nonce : gd_admin_nonce,
+                            step_order: sortedIDs
+                        },
+                        success: function(data, textStatus, jqXHR){
+                            if( data.success ){
+                                $('#choice-' + choiceID + '-' + postID).fadeOut().remove();
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown){
+                            alert(errorThrown)
+                        }
+                    });
+                }
+            });
+
             this.bindDeleteComment( $('.edit-gd-choice-inline') );
             this.bindAddNewChoice( $( '.new-progress-pt-choice' ) );
             this.bindDeleteChoice( $('.delete-choice') );

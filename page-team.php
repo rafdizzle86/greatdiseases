@@ -113,34 +113,53 @@
                     <!-- team progress -->
                     <div id="team-<?php echo $team_id ?>-progress" class="team-progress">
                         <h2>Team Progress:</h2>
+                        <div class="clear"></div>
                         <?php
+                        // Run a query to get the right ordering of progress points
                         $progress_pts = get_option( 'gd_progress_pts' );
+                        $gd_query_args = array(
+                            'post_type' => 'page',
+                            'post_status' => 'publish',
+                            'post__in' => $progress_pts,
+                            'posts_per_page' => -1,
+                            'orderby' => 'meta_value_num',
+                            'meta_key' => '_gd_step_order',
+                            'order' => 'ASC'
+                        );
+                        $gd_query = new WP_Query( $gd_query_args );
+
+                        // get team progress data structure
                         $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
 
-                        if( is_array( $progress_pts ) && !empty( $progress_pts ) ){
-                            foreach( $progress_pts as $progress_pt_id ){
-                                $progress_pt_page = get_post( $progress_pt_id );
-                                $progress_class = 'progress-point';
+                        if ( $gd_query->have_posts() ) {
+                            echo '<ol class="progress-meter">';
+                            while ( $gd_query->have_posts() ) {
+                                $gd_query->the_post();
+                                $progress_pt_page = get_post( get_the_ID() );
+                                $progress_class = 'progress-point todo';
 
-                                if( isset( $team_progress[ $progress_pt_id ] ) ){
-                                    $submission_post_id = $team_progress[ $progress_pt_id ];
+                                if( isset( $team_progress[ get_the_ID() ] ) ){
+                                    $submission_post_id = $team_progress[ get_the_ID() ];
                                     $progress_post = get_post( $submission_post_id );
 
                                     if( $progress_post->post_status == 'publish' ){
-                                        $progress_class = 'progress-point progress-point-completed';
+                                        $progress_class = 'progress-point done';
                                     }
                                 }
 
-                                $is_milestone = (bool) get_post_meta( $progress_pt_id, '_gd_is_milestone', true );
+                                $is_milestone = (bool) get_post_meta( get_the_ID(), '_gd_is_milestone', true );
+                                $step_order = get_post_meta( get_the_ID(), '_gd_step_order', true );
                                 if( is_object( $progress_pt_page ) && $is_milestone ){
-                                ?>
-                                    <div id="<?php echo $progress_pt_page->ID ?>-<?php echo $progress_pt_page->post_title ?>" class="<?php echo $progress_class ?>">
-                                        <p><a href="<?php echo get_permalink( $progress_pt_page->ID ) ?>"><?php echo $progress_pt_page->post_title ?></a></p>
-                                    </div>
+                                    ?>
+                                    <li class="<?php echo $progress_class ?>">
+                                        <a href="<?php echo get_permalink( $progress_pt_page->ID ) ?>"><?php echo $progress_pt_page->post_title ?></a>
+                                    </li>
                                 <?php
                                 }
                             }
+                            echo '</ol>';
                         }
+                        wp_reset_postdata();
                         ?>
                         <div class="clear"></div>
                     </div>
@@ -229,10 +248,7 @@
 
                     <?php } //end membership check ?>
                 <?php } //if CTXPS is enabled  ?>
-
-            <?php } // use is logged in check
-            print_r( $team_progress );
-            ?>
+            <?php } // user is logged in check ?>
 
             <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
                 <?php // show the page content if there is content to be shown ?>
