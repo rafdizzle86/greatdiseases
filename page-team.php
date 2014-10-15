@@ -115,6 +115,9 @@
                         <h2>Team Progress:</h2>
                         <div class="clear"></div>
                         <?php
+                        // check if the team has made a Cholera or TB decision, which will filter the query
+                        $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
+
                         // Run a query to get the right ordering of progress points
                         $progress_pts = get_option( 'gd_progress_pts' );
                         $gd_query_args = array(
@@ -128,8 +131,17 @@
                         );
                         $gd_query = new WP_Query( $gd_query_args );
 
-                        // get team progress data structure
-                        $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
+                        // @todo: create "start" or "pivot" steps
+                        // Check for cholera or TB decisions based on the "Pick a disease" step
+                        $disease_decision = '';
+                        if( !empty( $team_progress) ){
+                            foreach( $team_progress['decisions'] as $decision_id => $decision ){
+                                if( strpos( sanitize_title( $decision->step_title ), 'pick-a-disease' ) !== false ){
+                                    $disease_decision = $decision->choice_made;
+                                    break;
+                                }
+                            }
+                        }
 
                         if ( $gd_query->have_posts() ) {
                             echo '<ol class="progress-meter">';
@@ -138,6 +150,7 @@
                                 $progress_pt_page = get_post( get_the_ID() );
                                 $progress_class = 'progress-point todo';
 
+                                // If the team progressed thru the point, mark it as done
                                 if( isset( $team_progress[ get_the_ID() ] ) ){
                                     $submission_post_id = $team_progress[ get_the_ID() ];
                                     $progress_post = get_post( $submission_post_id );
@@ -148,13 +161,27 @@
                                 }
 
                                 $is_milestone = (bool) get_post_meta( get_the_ID(), '_gd_is_milestone', true );
-                                $step_order = get_post_meta( get_the_ID(), '_gd_step_order', true );
-                                if( is_object( $progress_pt_page ) && $is_milestone ){
-                                    ?>
-                                    <li class="<?php echo $progress_class ?>">
-                                        <a href="<?php echo get_permalink( $progress_pt_page->ID ) ?>"><?php echo $progress_pt_page->post_title ?></a>
-                                    </li>
-                                <?php
+                                $step_tag = get_post_meta( get_the_ID(), '_gd_step_metadata', true);
+
+
+                                // determines based off "Cholera" or "TB" decision in "Pick a disease" step
+                                // whether or not to show steps tagged as "TB" or "Cholera"
+                                $show_step = true;
+                                if( !empty( $step_tag) ){
+                                    if( $step_tag !== $disease_decision ){
+                                        $show_step = false;
+                                    }
+                                }
+
+                                if( is_object( $progress_pt_page ) && $is_milestone && $show_step ){
+                                    $step_html = '<li class="' . $progress_class . '">';
+                                        $step_html .= '<a href="' . get_permalink( $progress_pt_page->ID )  .'">' . $progress_pt_page->post_title  . '</a>';
+                                    $step_html .= '</li>';
+
+                                    // Apply some filters before we echo the step
+                                    $step_html = apply_filters( 'gd_progress_tracker_step_html_pre_render', $step_html, $progress_pt_page, $team_id );
+
+                                    echo $step_html;
                                 }
                             }
                             echo '</ol>';

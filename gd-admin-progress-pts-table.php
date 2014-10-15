@@ -331,7 +331,6 @@ class GD_Progress_Pts_Table extends WP_List_Table {
                     );
                     break;
 
-
                 default:
                     $orderby_args = array(
                         'orderby' => 'meta_value_num',
