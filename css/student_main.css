@@ -824,3 +824,34 @@ article {
     margin: 20px;
     position: relative;
 }
+
+/* Teacher Dashboard page template */
+#teacher-groups{
+    display: inline-flex;
+    flex-wrap: wrap;
+}
+.teacher-groups-header{
+    border-bottom: 1px solid #ccc;
+}
+.gd-tdash-group{
+    float: left;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin: 20px;
+    padding: 20px;
+    width: 25%;
+}
+#gd-tdash-group-members{
+    margin-top: 15px;
+}
+#gd-tdash-group-members img{
+    vertical-align: middle;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+#gd-tdash-group-members #group-member{
+    float: left;
+    width: 120px;
+    height: 100px;
+    text-align: center;
+}

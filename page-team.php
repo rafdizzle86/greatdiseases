@@ -134,7 +134,7 @@
                         // @todo: create "start" or "pivot" steps
                         // Check for cholera or TB decisions based on the "Pick a disease" step
                         $disease_decision = '';
-                        if( !empty( $team_progress) ){
+                        if( !empty( $team_progress['decisions'] ) ){
                             foreach( $team_progress['decisions'] as $decision_id => $decision ){
                                 if( strpos( sanitize_title( $decision->step_title ), 'pick-a-disease' ) !== false ){
                                     $disease_decision = $decision->choice_made;

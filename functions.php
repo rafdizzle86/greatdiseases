@@ -319,6 +319,60 @@ add_action( 'show_user_profile', 'gd_team_roles_fields' );
 add_action( 'edit_user_profile', 'gd_team_roles_fields' );
 
 /**
+ * Used for
+ */
+function gd_display_teacher_groups( $user ){
+    if( current_user_can( 'manage_options' ) ){
+        $user_type = get_user_meta( $user->ID, 'rpr_user_type', true );
+        $teacher_groups = get_user_meta( $user->ID, 'gd_teacher_groups', true );
+        if( $user_type === 'Teacher' ){
+        ?>
+        <h3>Great Disease Teacher Groups</h3>
+        <p>Select groups that belong to <?php echo $user->display_name ?>:</p>
+        <?php
+            if( class_exists( 'CTXPS_Queries' ) ){
+               $groups = CTXPS_Queries::get_groups();
+               foreach( $groups as $group ){
+                   if( $group->ID > 1 ){
+                       $checked = in_array( $group->ID, $teacher_groups ) ? 'checked' : '';
+                       echo '<input type="checkbox" id="gd-group[]" name="gd-group[]" ' . $checked . ' value="' . $group->ID . '">';
+                       echo $group->group_title;
+                       echo '<br />';
+                   }
+               }
+            }
+        ?>
+    <?php
+        }// end user type check
+    }
+}
+
+add_action( 'show_user_profile', 'gd_display_teacher_groups' );
+add_action( 'edit_user_profile', 'gd_display_teacher_groups' );
+
+/**
+ * Saves groups to teacher users
+ */
+function save_gd_teacher_groups( $user_id ){
+    if ( !current_user_can( 'edit_user', $user_id ) ) {
+        return false;
+    }
+
+    $selected_groups = $_POST['gd-group'];
+
+    if( empty( $selected_groups ) ){
+        update_user_meta( $user_id, 'gd_teacher_groups', array() );
+    }else{
+        update_user_meta( $user_id, 'gd_teacher_groups', $selected_groups );
+    }
+
+    return $user_id;
+}
+
+add_action( 'personal_options_update', 'save_gd_teacher_groups' );
+add_action( 'edit_user_profile_update', 'save_gd_teacher_groups' );
+
+/**
  * Saves a role to the user meta of the currently displayed user
  */
 function save_gd_team_roles( $user_id ){
