@@ -107,11 +107,47 @@
             });
         },
         /**
-         * Onclick for edit elem for the milestone column
-         * @param editElem
+         *
+         * @param isVisibleElem
          */
-        selectMilestone: function( editElem ){
-                editElem.click(function(){
+        selectIsVisible: function ( isVisibleElem ){
+            isVisibleElem.click(function(){
+                var is_visible = Boolean( $(this).attr('checked') );
+                var gd_admin_nonce = $('#gd_admin_nonce').val();
+                var postID = $(this).data('postid');
+
+                alert( is_visible );
+                /*
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gd_set_milestone',
+                        gd_admin_nonce: gd_admin_nonce,
+                        postID: postID,
+                        is_milestone: is_milestone
+                    },
+                    success: function(data, textStatus, jqXHR){
+                        if( data.success ){
+                            console.log(data);
+                        }else{
+                            alert('Blech;');
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown){
+                        alert(errorThrown);
+                    }
+                });
+                */
+            });
+        },
+        /**
+         * Onclick for edit elem for the milestone column
+         * @param mileStoneElem
+         */
+        selectMilestone: function( mileStoneElem ){
+                mileStoneElem.click(function(){
                     var is_milestone = Boolean( $(this).attr('checked') );
                     var gd_admin_nonce = $('#gd_admin_nonce').val();
                     var postID = $(this).data('postid');
@@ -158,6 +194,8 @@
 
         init: function(){
 
+            // Handlers for 'Is Milestone' and 'Is Visible' checkboxes
+            this.selectIsVisible( $( '.is-visible-checkbox') );
             this.selectMilestone( $( '.is-milestone-checkbox' ) );
 
             // Make admin table sortable

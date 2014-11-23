@@ -34,9 +34,10 @@ class GD_Settings_Page
             return;
 
         echo '<style type="text/css">';
-        echo '.wp-list-table .column-post_title { width: 80%; }';
+        echo '.wp-list-table .column-post_title { width: 70%; }';
         echo '.wp-list-table .column-post_step_metadata { width: 10%; }';
         echo '.wp-list-table .column-post_is_milestone { width: 10%; }';
+        echo '.wp-list-table .column-post_is_visible { width: 10%; }';
         echo '</style>';
     }
 
@@ -82,8 +83,16 @@ class GD_Settings_Page
 
         add_settings_field(
             'gd_is_milestone', // ID
-            'Is this step a milestone? <small>(determines if it\'s displayed in the team page progress tracker):</small>', // Title
+            'Is this step a milestone? <small>(determines if step requires an answer before proceeding and display choices to the user):</small>', // Title
             array( $this, 'gd_is_milestone_callback' ), // Callback
+            'gd-setting-admin', // Page
+            'gd_progress_pt_section' // Section
+        );
+
+        add_settings_field(
+            'gd_is_visible', // ID
+            'Is this step visible? <small>(determines if the step is visible in the progress tracker on the team page):</small>', // Title
+            array( $this, 'gd_is_visible_callback' ), // Callback
             'gd-setting-admin', // Page
             'gd_progress_pt_section' // Section
         );
@@ -194,12 +203,8 @@ class GD_Settings_Page
         );
         $step_id = wp_insert_post( $new_step_args );
 
-        if( $new_value['gd_is_milestone'] == 'true' ){
-            add_post_meta( $step_id, '_gd_is_milestone', true );
-        }else{
-            add_post_meta( $step_id, '_gd_is_milestone', false );
-        }
-
+        add_post_meta( $step_id, '_gd_is_milestone', $new_value['gd_is_milestone'] );
+        add_post_meta( $step_id, '_gd_is_visible', $new_value['gd_is_visible'], true );
         add_post_meta( $step_id, '_gd_step_metadata', $new_value['gd_step_metadata'], true );
         add_post_meta( $step_id, '_gd_step_order', count( $gd_progress_pts ), true );
 
@@ -218,6 +223,13 @@ class GD_Settings_Page
 
     public function gd_step_metadata(){
         echo '<input type="text" id="gd_step_metadata" name="gd_progress_pts[gd_step_metadata]" value="" />';
+    }
+
+    /**
+     * Milestone checkbox
+     */
+    public function gd_is_visible_callback(){
+        echo '<input type="checkbox" id="gd_is_visible" name="gd_progress_pts[gd_is_visible]" value="true" />';
     }
 
     /**
@@ -298,6 +310,10 @@ class GD_Settings_Page
         echo json_encode( $step_order );
         exit;
     }
+
+    /**
+     * AJAX call to set step visibility
+     */
 
 	/**
 	 * AJAX call that sets the Milestone boolean option

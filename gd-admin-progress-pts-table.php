@@ -24,11 +24,88 @@ class GD_Progress_Pts_Table extends WP_List_Table {
 	            $is_milestone = $is_milestone == 'true' ? 'checked' : '';
 		        return '<input type="checkbox" class="is-milestone-checkbox" id="is-milestone-' . $item->ID . '" data-postid="' . $item->ID .'" name="is-milestone-' . $item->ID . '" ' . $is_milestone . ' />';
             case 'post_step_metadata':
+            case 'post_is_visible':
+            $is_visible = get_post_meta( $item->ID, '_gd_is_visible', true);
+            $is_visible = $is_visible == 'true' ? 'checked' : '';
+            return '<input type="checkbox" class="is-visible-checkbox" id="is-visible-' . $item->ID . '" data-postid="' . $item->ID .'" name="is-milestone-' . $item->ID . '" ' . $is_visible . ' />';
             case 'post_title':
                 return $item->$column_name;
             default:
                 return ''; //Show the whole array for troubleshooting purposes
         }
+    }
+
+    /**
+     * Rollover actions for the meta data column
+     * @param $item
+     * @return string
+     */
+    function column_post_step_metadata( $item ){
+        //Build row actions
+        $actions = array(
+            'edit_metadata' => sprintf('<a href="#" class="edit-gd-metadata-inline" id="edit-gd-metadata-inline-%s" data-postid="%s">Edit</a>' , $item->ID, $item->ID),
+        );
+
+        $post_step_metadata = get_post_meta( $item->ID, '_gd_step_metadata', true);
+        $post_step_metadata = empty( $post_step_metadata ) ? '&nbsp;' : $post_step_metadata;
+        //Return the title contents
+        return sprintf('%1$s %2$s %3$s',
+            /*$1%s*/ $post_step_metadata,
+            /*$2%s*/ $this->row_actions($actions),
+            /*$3%s*/ $this->render_progress_pt_choice_form( $item->ID )
+        );
+    }
+
+
+    /** ************************************************************************
+     * Recommended. This is a custom column method and is responsible for what
+     * is rendered in any column with a name/slug of 'title'. Every time the class
+     * needs to render a column, it first looks for a method named
+     * column_{$column_title} - if it exists, that method is run. If it doesn't
+     * exist, column_default() is called instead.
+     *
+     * This example also illustrates how to implement rollover actions. Actions
+     * should be an associative array formatted as 'slug'=>'link html' - and you
+     * will need to generate the URLs yourself. You could even ensure the links
+     *
+     *
+     * @see WP_List_Table::::single_row_columns()
+     * @param array $item A singular item (one full row's worth of data)
+     * @return string Text to be placed inside the column <td> (movie title only)
+     **************************************************************************/
+    function column_post_title( $item ){
+
+        //Build row actions
+        $actions = array(
+            'edit_choices' => sprintf('<a href="#" class="edit-gd-choice-inline" id="edit-gd-choice-inline-%s" data-postid="%s">Edit Choices</a>' , $item->ID, $item->ID),
+            'edit' => sprintf( '<a href="%s">Edit Step</a>', get_edit_post_link( $item->ID ) ),
+            'view' => sprintf( '<a href="%s">View Step</a>', get_permalink( $item->ID ) ),
+            'delete' => sprintf( '<a href="?page=%s&action=%s&gd_list_progress_pt[]=%s">Delete</a>',$_REQUEST['page'],'delete',$item->ID )
+        );
+
+        //Return the title contents
+        return sprintf('%1$s %2$s %3$s',
+            /*$1%s*/ $item->post_title,
+            /*$2%s*/ $this->row_actions($actions),
+            /*$3%s*/ $this->render_progress_pt_choice_form( $item->ID )
+        );
+    }
+
+    /** ************************************************************************
+     * REQUIRED if displaying checkboxes or using bulk actions! The 'cb' column
+     * is given special treatment when columns are processed. It ALWAYS needs to
+     * have it's own method.
+     *
+     * @see WP_List_Table::::single_row_columns()
+     * @param array $item A singular item (one full row's worth of data)
+     * @return string Text to be placed inside the column <td> (movie title only)
+     **************************************************************************/
+    function column_cb($item){
+        return sprintf(
+            '<input type="checkbox" name="%1$s[]" value="%2$s" />',
+            /*$1%s*/ $this->_args['singular'],  //Let's simply repurpose the table's singular label ("movie")
+            /*$2%s*/ $item->ID                //The value of the checkbox should be the record's id
+        );
     }
 
     /**
@@ -145,79 +222,6 @@ class GD_Progress_Pts_Table extends WP_List_Table {
         return $drop_down_html;
     }
 
-	/**
-	 * Rollover actions for the meta data column
-	 * @param $item
-	 * @return string
-	 */
-	function column_post_step_metadata( $item ){
-		//Build row actions
-		$actions = array(
-			'edit_metadata' => sprintf('<a href="#" class="edit-gd-metadata-inline" id="edit-gd-metadata-inline-%s" data-postid="%s">Edit</a>' , $item->ID, $item->ID),
-		);
-
-		$post_step_metadata = get_post_meta( $item->ID, '_gd_step_metadata', true);
-		$post_step_metadata = empty( $post_step_metadata ) ? '&nbsp;' : $post_step_metadata;
-		//Return the title contents
-		return sprintf('%1$s %2$s %3$s',
-			/*$1%s*/ $post_step_metadata,
-			/*$2%s*/ $this->row_actions($actions),
-			/*$3%s*/ $this->render_progress_pt_choice_form( $item->ID )
-		);
-	}
-
-
-    /** ************************************************************************
-     * Recommended. This is a custom column method and is responsible for what
-     * is rendered in any column with a name/slug of 'title'. Every time the class
-     * needs to render a column, it first looks for a method named
-     * column_{$column_title} - if it exists, that method is run. If it doesn't
-     * exist, column_default() is called instead.
-     *
-     * This example also illustrates how to implement rollover actions. Actions
-     * should be an associative array formatted as 'slug'=>'link html' - and you
-     * will need to generate the URLs yourself. You could even ensure the links
-     *
-     *
-     * @see WP_List_Table::::single_row_columns()
-     * @param array $item A singular item (one full row's worth of data)
-     * @return string Text to be placed inside the column <td> (movie title only)
-     **************************************************************************/
-    function column_post_title( $item ){
-
-        //Build row actions
-        $actions = array(
-            'edit_choices' => sprintf('<a href="#" class="edit-gd-choice-inline" id="edit-gd-choice-inline-%s" data-postid="%s">Edit Choices</a>' , $item->ID, $item->ID),
-            'edit' => sprintf( '<a href="%s">Edit Step</a>', get_edit_post_link( $item->ID ) ),
-            'view' => sprintf( '<a href="%s">View Step</a>', get_permalink( $item->ID ) ),
-            'delete' => sprintf( '<a href="?page=%s&action=%s&gd_list_progress_pt[]=%s">Delete</a>',$_REQUEST['page'],'delete',$item->ID )
-        );
-
-        //Return the title contents
-        return sprintf('%1$s %2$s %3$s',
-            /*$1%s*/ $item->post_title,
-            /*$2%s*/ $this->row_actions($actions),
-            /*$3%s*/ $this->render_progress_pt_choice_form( $item->ID )
-        );
-    }
-
-    /** ************************************************************************
-     * REQUIRED if displaying checkboxes or using bulk actions! The 'cb' column
-     * is given special treatment when columns are processed. It ALWAYS needs to
-     * have it's own method.
-     *
-     * @see WP_List_Table::::single_row_columns()
-     * @param array $item A singular item (one full row's worth of data)
-     * @return string Text to be placed inside the column <td> (movie title only)
-     **************************************************************************/
-    function column_cb($item){
-        return sprintf(
-            '<input type="checkbox" name="%1$s[]" value="%2$s" />',
-            /*$1%s*/ $this->_args['singular'],  //Let's simply repurpose the table's singular label ("movie")
-            /*$2%s*/ $item->ID                //The value of the checkbox should be the record's id
-        );
-    }
-
     /** ************************************************************************
      * Optional. If you need to include bulk actions in your list table, this is
      * the place to define them. Bulk actions are an associative array in the format
@@ -280,15 +284,15 @@ class GD_Progress_Pts_Table extends WP_List_Table {
             'cb' => '<input type="checkbox" />', //Render a checkbox instead of text
             'post_title' => __('Step Title'),
             'post_step_metadata' => __('Meta Data'),
-            'post_is_milestone' => __('Is Milestone')
-            //'post_is_visible'   => __('Is Visible')
+            'post_is_milestone' => __('Is Milestone'),
+            'post_is_visible' => __('Is Visible'),
         );
     }
 
     /**
      * Decide which columns to activate the sorting functionality on
      * @return array $sortable, the array of columns that can be sorted by the user
-     */
+
     public function get_sortable_columns() {
         $sortable_columns = array(
             'post_title' => array('post_title',false),     //true means it's already sorted
@@ -297,6 +301,7 @@ class GD_Progress_Pts_Table extends WP_List_Table {
         );
         return $sortable_columns;
     }
+     * /
 
     /**
      * Prepare the table with different parameters, pagination, columns and table elements
@@ -318,7 +323,8 @@ class GD_Progress_Pts_Table extends WP_List_Table {
          */
         $columns = $this->get_columns();
         $hidden = array();
-        $sortable = $this->get_sortable_columns();
+        //$sortable = $this->get_sortable_columns();
+        $sortable = array();
 
         /**
          * REQUIRED. Finally, we build an array to be used by the class for column
