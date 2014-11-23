@@ -107,6 +107,39 @@
             });
         },
         /**
+         * Onclick for edit elem for the milestone column
+         * @param editElem
+         */
+        selectMilestone: function( editElem ){
+                editElem.click(function(){
+                    var is_milestone = Boolean( $(this).attr('checked') );
+                    var gd_admin_nonce = $('#gd_admin_nonce').val();
+                    var postID = $(this).data('postid');
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'gd_set_milestone',
+                            gd_admin_nonce: gd_admin_nonce,
+                            postID: postID,
+                            is_milestone: is_milestone
+                        },
+                        success: function(data, textStatus, jqXHR){
+                            if( data.success ){
+                                console.log(data);
+                            }else{
+                                alert('Blech;');
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown){
+                            alert(errorThrown);
+                        }
+                    });
+                });
+        },
+
+        /**
          * Binds click event to the saveChoicesSettings element
          * @param saveChoiceSettingsElem
          */
@@ -124,6 +157,8 @@
         },
 
         init: function(){
+
+            this.selectMilestone( $( '.is-milestone-checkbox' ) );
 
             // Make admin table sortable
             $('.gd_list_progress_pts #the-list').sortable({

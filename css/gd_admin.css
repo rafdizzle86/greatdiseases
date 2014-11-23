@@ -5,15 +5,23 @@
     border-radius: 3px;
 }
 
-.gd-progress-pt-choice:hover .delete-choice{
+.gd-progress-pt-choice:hover .choice-settings{
     display: inline;
 }
 
-.delete-choice{
+.choice-settings{
     display: none;
+}
+.save-choice{
+    color: #568c0a;
+}
+.save-choice:hover{
+    color: #0cb900;
+    cursor: pointer;
+}
+.delete-choice{
     color: #a00;
 }
-
 .delete-choice:hover{
     color: #f00;
     cursor: pointer;

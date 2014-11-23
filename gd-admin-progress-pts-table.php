@@ -15,18 +15,15 @@ class GD_Progress_Pts_Table extends WP_List_Table {
             'plural'   => 'gd_list_progress_pts', //plural label, also this well be one of the table css class
             'ajax'     => false //We won't support Ajax for this table
         ) );
-
     }
 
     function column_default($item, $column_name){
         switch($column_name){
             case 'post_is_milestone':
-                $is_milestone = get_post_meta( $item->ID, '_gd_is_milestone', true);
-                $is_milestone = $is_milestone ? 'Yes' : '';
-                return $is_milestone;
+	            $is_milestone = get_post_meta( $item->ID, '_gd_is_milestone', true);
+	            $is_milestone = $is_milestone == 'true' ? 'checked' : '';
+		        return '<input type="checkbox" class="is-milestone-checkbox" id="is-milestone-' . $item->ID . '" data-postid="' . $item->ID .'" name="is-milestone-' . $item->ID . '" ' . $is_milestone . ' />';
             case 'post_step_metadata':
-                $post_step_metadata = get_post_meta( $item->ID, '_gd_step_metadata', true);
-                return $post_step_metadata;
             case 'post_title':
                 return $item->$column_name;
             default:
@@ -99,11 +96,18 @@ class GD_Progress_Pts_Table extends WP_List_Table {
      * @return string
      */
     function render_progress_pt_choice( $choice, $choice_id, $progress_pt_id ){
-        $choice_html = '<p id="choice-' . $choice_id .'-' . $progress_pt_id . '" class="gd-progress-pt-choice">';
+
+	    $choice_html = '<div id="choice-' . $choice_id .'-' . $progress_pt_id . '" class="gd-progress-pt-choice">';
             $choice_html .= 'Text: <input type="text" id="choice-text-' . $choice_id . '" value="' . $choice['choice_title'] . '"> ';
-            $delete_choice = ' <span id="delete-choice-' . $choice_id . '" class="delete-choice delete" data-choiceid="' . $choice_id . '" data-postid="' . $progress_pt_id . '">Delete</span>';
-            $choice_html .= $this->render_progress_pts_dropdown( 'choice-goto-' . $choice_id, 'Goes to step: ', $choice['choice_goto_id'], $delete_choice);
-        $choice_html .= '</p>';
+
+
+	        $delete_choice = '<span id="delete-choice-' . $choice_id . '" class="delete-choice delete" data-choiceid="' . $choice_id . '" data-postid="' . $progress_pt_id . '">Delete</span>';
+	        $save_choice = '<span id="save-choice-' . $choice_id . '" class="save-choice save" data-choiceid="' . $choice_id . '" data-postid="' . $progress_pt_id . '">Save Changes</span>';
+	        $settings = '<div id="choice-settings-' . $choice_id . '" class="choice-settings"> ' . $delete_choice . ' | ' . $save_choice . '</div>';
+
+            $choice_html .= $this->render_progress_pts_dropdown( 'choice-goto-' . $choice_id, 'Goes to step: ', $choice['choice_goto_id'], $settings);
+        $choice_html .= '</div>';
+
         return $choice_html;
     }
 
@@ -140,6 +144,28 @@ class GD_Progress_Pts_Table extends WP_List_Table {
 
         return $drop_down_html;
     }
+
+	/**
+	 * Rollover actions for the meta data column
+	 * @param $item
+	 * @return string
+	 */
+	function column_post_step_metadata( $item ){
+		//Build row actions
+		$actions = array(
+			'edit_metadata' => sprintf('<a href="#" class="edit-gd-metadata-inline" id="edit-gd-metadata-inline-%s" data-postid="%s">Edit</a>' , $item->ID, $item->ID),
+		);
+
+		$post_step_metadata = get_post_meta( $item->ID, '_gd_step_metadata', true);
+		$post_step_metadata = empty( $post_step_metadata ) ? '&nbsp;' : $post_step_metadata;
+		//Return the title contents
+		return sprintf('%1$s %2$s %3$s',
+			/*$1%s*/ $post_step_metadata,
+			/*$2%s*/ $this->row_actions($actions),
+			/*$3%s*/ $this->render_progress_pt_choice_form( $item->ID )
+		);
+	}
+
 
     /** ************************************************************************
      * Recommended. This is a custom column method and is responsible for what
@@ -280,7 +306,7 @@ class GD_Progress_Pts_Table extends WP_List_Table {
         /**
          * First, lets decide how many records per page to show
          */
-        $per_page = 20;
+        $per_page = -1;
 
 
         /**

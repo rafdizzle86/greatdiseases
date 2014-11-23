@@ -160,7 +160,8 @@
                                     }
                                 }
 
-                                $is_milestone = (bool) get_post_meta( get_the_ID(), '_gd_is_milestone', true );
+                                $is_milestone = get_post_meta( get_the_ID(), '_gd_is_milestone', true );
+	                            $is_milestone = ($is_milestone == 'true') ? true : false;
                                 $step_tag = get_post_meta( get_the_ID(), '_gd_step_metadata', true);
 
 

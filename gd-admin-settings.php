@@ -15,6 +15,7 @@ class GD_Settings_Page
         add_action( 'admin_init', array( $this, 'page_init' ) );
         add_action( 'admin_notices', array( $this, 'show_settings_errors') );
         add_filter( 'pre_update_option_gd_progress_pts', array( $this, 'save_gd_progress_pts'), 10, 2 );
+	    add_action( 'wp_ajax_gd_set_milestone', array( $this, 'gd_set_milestone') );
         add_action( 'wp_ajax_gd_add_new_choice', array( $this, 'gd_add_new_choice') );
         add_action( 'wp_ajax_gd_delete_step_choice', array( $this, 'gd_delete_step_choice') );
         add_action( 'wp_ajax_gd_set_step_order', array( $this, 'gd_set_step_order') );
@@ -81,7 +82,7 @@ class GD_Settings_Page
 
         add_settings_field(
             'gd_is_milestone', // ID
-            'Is this step a milestone? <small>(determines if it\'s displayed in the team page):</small>', // Title
+            'Is this step a milestone? <small>(determines if it\'s displayed in the team page progress tracker):</small>', // Title
             array( $this, 'gd_is_milestone_callback' ), // Callback
             'gd-setting-admin', // Page
             'gd_progress_pt_section' // Section
@@ -135,7 +136,6 @@ class GD_Settings_Page
             </div>
         </div>
     <?php
-    print_r( $this->options );
     }
 
     /**
@@ -298,6 +298,34 @@ class GD_Settings_Page
         echo json_encode( $step_order );
         exit;
     }
+
+	/**
+	 * AJAX call that sets the Milestone boolean option
+	 */
+	function gd_set_milestone(){
+		$nonce = $_POST[ 'gd_admin_nonce' ];
+		if( !wp_verify_nonce( $nonce, 'gd_add_new_choice' ) ){
+			header("HTTP/1.0 409 Security Check.");
+			exit;
+		}
+
+		if( empty( $_POST['postID'] ) ){
+			header("HTTP/1.0 409 Could not locate post ID.");
+			exit;
+		}
+
+		if( empty( $_POST['is_milestone'] ) ){
+			header("HTTP/1.0 409 Please fill in a choice title.");
+			exit;
+		}
+
+		$post_id = (int) $_POST['postID'];
+		$is_milestone = $_POST['is_milestone'];
+
+		$success = update_post_meta( $post_id, '_gd_is_milestone', $is_milestone );
+		echo json_encode( array( 'success' => $success ) );
+		exit;
+	}
 
     /**
      * Adds a new choice to a decision tree step
