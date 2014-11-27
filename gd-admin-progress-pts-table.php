@@ -27,7 +27,7 @@ class GD_Progress_Pts_Table extends WP_List_Table {
             case 'post_is_visible':
             $is_visible = get_post_meta( $item->ID, '_gd_is_visible', true);
             $is_visible = $is_visible == 'true' ? 'checked' : '';
-            return '<input type="checkbox" class="is-visible-checkbox" id="is-visible-' . $item->ID . '" data-postid="' . $item->ID .'" name="is-milestone-' . $item->ID . '" ' . $is_visible . ' />';
+            return '<input type="checkbox" class="is-visible-checkbox" id="is-visible-' . $item->ID . '" data-postid="' . $item->ID .'" name="is-visible-' . $item->ID . '" ' . $is_visible . ' />';
             case 'post_title':
                 return $item->$column_name;
             default:
@@ -142,7 +142,6 @@ class GD_Progress_Pts_Table extends WP_List_Table {
             $choice_form .= '<div id="gd-progress-pt-existing-choices-' . $progress_pt_id .'" class="gd-progress-pt-existing-choices">';
                 $choice_form .= $this->render_progress_pt_choices( $progress_pt_id, '<p><b>Existing Choices:</b></p><form id="choice-form-' . $progress_pt_id  .'">', '</form>' );
             $choice_form .= '</div>';
-            //$choice_form .= '<button id="save-progress-pt-choice-settings-' . $progress_pt_id .'" data-postid="' . $progress_pt_id .'" class="save-progress-pt-choice-settings button button-primary" type="button">Save changes</button>';
 
         $choice_form .= '</div>';
 
@@ -177,12 +176,11 @@ class GD_Progress_Pts_Table extends WP_List_Table {
 	    $choice_html = '<div id="choice-' . $choice_id .'-' . $progress_pt_id . '" class="gd-progress-pt-choice">';
             $choice_html .= 'Text: <input type="text" id="choice-text-' . $choice_id . '" value="' . $choice['choice_title'] . '"> ';
 
-
 	        $delete_choice = '<span id="delete-choice-' . $choice_id . '" class="delete-choice delete" data-choiceid="' . $choice_id . '" data-postid="' . $progress_pt_id . '">Delete</span>';
 	        $save_choice = '<span id="save-choice-' . $choice_id . '" class="save-choice save" data-choiceid="' . $choice_id . '" data-postid="' . $progress_pt_id . '">Save Changes</span>';
 	        $settings = '<div id="choice-settings-' . $choice_id . '" class="choice-settings"> ' . $delete_choice . ' | ' . $save_choice . '</div>';
 
-            $choice_html .= $this->render_progress_pts_dropdown( 'choice-goto-' . $choice_id, 'Goes to step: ', $choice['choice_goto_id'], $settings);
+            $choice_html .= $this->render_progress_pts_dropdown( 'choice-goto-' . $choice_id . '-' . $progress_pt_id, 'Goes to step: ', $choice['choice_goto_id'], $settings);
         $choice_html .= '</div>';
 
         return $choice_html;

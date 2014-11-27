@@ -15,6 +15,8 @@ class GD_Settings_Page
         add_action( 'admin_init', array( $this, 'page_init' ) );
         add_action( 'admin_notices', array( $this, 'show_settings_errors') );
         add_filter( 'pre_update_option_gd_progress_pts', array( $this, 'save_gd_progress_pts'), 10, 2 );
+        add_action( 'wp_ajax_gd_save_choice_settings', array( $this, 'gd_save_choice_settings') );
+        add_action( 'wp_ajax_gd_set_visibility', array( $this, 'gd_set_visibility') );
 	    add_action( 'wp_ajax_gd_set_milestone', array( $this, 'gd_set_milestone') );
         add_action( 'wp_ajax_gd_add_new_choice', array( $this, 'gd_add_new_choice') );
         add_action( 'wp_ajax_gd_delete_step_choice', array( $this, 'gd_delete_step_choice') );
@@ -312,8 +314,74 @@ class GD_Settings_Page
     }
 
     /**
+     * AJAX call to save choice settings
+     */
+    function gd_save_choice_settings(){
+        $nonce = $_POST[ 'gd_admin_nonce' ];
+        if( !wp_verify_nonce( $nonce, 'gd_add_new_choice' ) ){
+            header("HTTP/1.0 409 Security Check.");
+            exit;
+        }
+
+        if( empty( $_POST['postID'] ) ){
+            header("HTTP/1.0 409 Could not locate post ID.");
+            exit;
+        }
+
+        if( !isset( $_POST['choiceID'] ) ){
+            header("HTTP/1.0 409 Could not locate choice ID.");
+            exit;
+        }
+
+        $post_id = (int) $_POST['postID'];
+        $choice_id = (int) $_POST['choiceID'];
+        $choice_txt = (string) $_POST['choiceText'];
+        $choice_goto_id = (int) $_POST['nextStep'];
+
+        $choices = get_post_meta( $post_id, '_gd_progress_pt_choices', true);
+
+        /**
+         * Update the choice with 'choice_id' with a new 'choice_txt'
+         * and 'choice_goto_id'
+         */
+        if( !empty( $choices ) && is_array( $choices ) ){
+            if( isset( $choices[ $choice_id ] ) ){
+                $choice = $choices[ $choice_id ];
+                $choice['choice_title'] = $choice_txt;
+                $choice['choice_goto_id'] = $choice_goto_id;
+            }
+        }
+
+        $success = update_post_meta( $post_id, '_gd_progress_pt_choices', $choices );
+
+        echo json_encode( array( 'success' => $success ) );
+
+        exit;
+    }
+
+    /**
      * AJAX call to set step visibility
      */
+    function gd_set_visibility(){
+        $nonce = $_POST[ 'gd_admin_nonce' ];
+        if( !wp_verify_nonce( $nonce, 'gd_add_new_choice' ) ){
+            header("HTTP/1.0 409 Security Check.");
+            exit;
+        }
+
+        if( empty( $_POST['postID'] ) ){
+            header("HTTP/1.0 409 Could not locate post ID.");
+            exit;
+        }
+
+        $post_id = (int) $_POST['postID'];
+        $is_visible = $_POST['is_visible'];
+
+        $success = update_post_meta( $post_id, '_gd_is_visible', $is_visible );
+        echo json_encode( array( 'success' => $success ) );
+        exit;
+    }
+
 
 	/**
 	 * AJAX call that sets the Milestone boolean option

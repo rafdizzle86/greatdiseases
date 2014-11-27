@@ -107,7 +107,7 @@
             });
         },
         /**
-         *
+         * AJAX handler for visibility checkboxes
          * @param isVisibleElem
          */
         selectIsVisible: function ( isVisibleElem ){
@@ -116,30 +116,27 @@
                 var gd_admin_nonce = $('#gd_admin_nonce').val();
                 var postID = $(this).data('postid');
 
-                alert( is_visible );
-                /*
                 $.ajax({
                     url: ajaxurl,
                     type: 'POST',
                     dataType: 'json',
                     data: {
-                        action: 'gd_set_milestone',
+                        action: 'gd_set_visibility',
                         gd_admin_nonce: gd_admin_nonce,
                         postID: postID,
-                        is_milestone: is_milestone
+                        is_visible: is_visible
                     },
                     success: function(data, textStatus, jqXHR){
                         if( data.success ){
                             console.log(data);
                         }else{
-                            alert('Blech;');
+                            alert('Something went wrong!');
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown){
                         alert(errorThrown);
                     }
                 });
-                */
             });
         },
         /**
@@ -165,7 +162,7 @@
                             if( data.success ){
                                 console.log(data);
                             }else{
-                                alert('Blech;');
+                                alert('Something went wrong!');
                             }
                         },
                         error: function(jqXHR, textStatus, errorThrown){
@@ -176,25 +173,45 @@
         },
 
         /**
-         * Binds click event to the saveChoicesSettings element
-         * @param saveChoiceSettingsElem
-         */
-        bindSaveChoiceSettings: function(saveChoiceSettingsElem){
-            var self = this;
-            saveChoiceSettingsElem.click(function(){
-                this.saveChoiceSettings();
-            });
-        },
-        /**
          * Serializes choice form and saves changes to the various choices
          */
-        saveChoiceSettings: function(){
+        saveChoiceSettings: function(saveChoiceSettingsElem){
+            saveChoiceSettingsElem.click(function(){
+                var postID = $(this).data('postid');
+                var choiceID = $(this).data('choiceid');
+                var gd_admin_nonce = $('#gd_admin_nonce').val();
+                var choiceText = $('#choice-text-' + choiceID).val()
+                var nextStep = $('#choice-goto-' + choiceID + '-' + postID).val();
 
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'gd_save_choice_settings',
+                        gd_admin_nonce: gd_admin_nonce,
+                        postID: postID,
+                        choiceID: choiceID,
+                        choiceText: choiceText,
+                        nextStep: nextStep
+                    },
+                    success: function(data, textStatus, jqXHR){
+                        if( data.success ){
+                            console.log(data);
+                        }else{
+                            alert('Something went wrong!');
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown){
+                        alert(errorThrown);
+                    }
+                });
+            });
         },
 
         init: function(){
 
-            // Handlers for 'Is Milestone' and 'Is Visible' checkboxes
+            // Handlers for 'Save Choice', 'Is Milestone' and 'Is Visible' checkboxes/buttons
+            this.saveChoiceSettings( $( '.save-choice' ) );
             this.selectIsVisible( $( '.is-visible-checkbox') );
             this.selectMilestone( $( '.is-milestone-checkbox' ) );
 

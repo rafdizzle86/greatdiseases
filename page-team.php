@@ -160,10 +160,9 @@
                                     }
                                 }
 
-                                $is_milestone = get_post_meta( get_the_ID(), '_gd_is_milestone', true );
-	                            $is_milestone = ($is_milestone == 'true') ? true : false;
+                                $is_visible = get_post_meta( get_the_ID(), '_gd_is_visible', true );
+	                            $is_visible = ($is_visible == 'true') ? true : false;
                                 $step_tag = get_post_meta( get_the_ID(), '_gd_step_metadata', true);
-
 
                                 // determines based off "Cholera" or "TB" decision in "Pick a disease" step
                                 // whether or not to show steps tagged as "TB" or "Cholera"
@@ -174,7 +173,7 @@
                                     }
                                 }
 
-                                if( is_object( $progress_pt_page ) && $is_milestone && $show_step ){
+                                if( is_object( $progress_pt_page ) && $is_visible && $show_step ){
                                     $step_html = '<li class="' . $progress_class . '">';
                                         $step_html .= '<a href="' . get_permalink( $progress_pt_page->ID )  .'">' . $progress_pt_page->post_title  . '</a>';
                                     $step_html .= '</li>';
