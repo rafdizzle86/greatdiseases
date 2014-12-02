@@ -26,3 +26,14 @@
     color: #f00;
     cursor: pointer;
 }
+
+.gd_metadata_editable:hover{
+    font-weight: bold;
+}
+.gd_metadata_editable{
+    cursor: pointer;
+}
+.gd_metadata_input input{
+    min-width: 200px;
+    min-height: 30px;
+}

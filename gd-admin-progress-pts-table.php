@@ -23,37 +23,24 @@ class GD_Progress_Pts_Table extends WP_List_Table {
 	            $is_milestone = get_post_meta( $item->ID, '_gd_is_milestone', true);
 	            $is_milestone = $is_milestone == 'true' ? 'checked' : '';
 		        return '<input type="checkbox" class="is-milestone-checkbox" id="is-milestone-' . $item->ID . '" data-postid="' . $item->ID .'" name="is-milestone-' . $item->ID . '" ' . $is_milestone . ' />';
+
             case 'post_step_metadata':
+                $post_step_metadata = get_post_meta( $item->ID, '_gd_step_metadata', true);
+                $post_step_metadata = empty( $post_step_metadata ) ? '' : $post_step_metadata;
+                $post_step_metadata = '<span class="gd_metadata_editable" id="' . $item->ID . '">' . $post_step_metadata  . '</span>';
+                return $post_step_metadata;
+
             case 'post_is_visible':
-            $is_visible = get_post_meta( $item->ID, '_gd_is_visible', true);
-            $is_visible = $is_visible == 'true' ? 'checked' : '';
-            return '<input type="checkbox" class="is-visible-checkbox" id="is-visible-' . $item->ID . '" data-postid="' . $item->ID .'" name="is-visible-' . $item->ID . '" ' . $is_visible . ' />';
+                $is_visible = get_post_meta( $item->ID, '_gd_is_visible', true);
+                $is_visible = $is_visible == 'true' ? 'checked' : '';
+                return '<input type="checkbox" class="is-visible-checkbox" id="is-visible-' . $item->ID . '" data-postid="' . $item->ID .'" name="is-visible-' . $item->ID . '" ' . $is_visible . ' />';
+
             case 'post_title':
                 return $item->$column_name;
+
             default:
                 return ''; //Show the whole array for troubleshooting purposes
         }
-    }
-
-    /**
-     * Rollover actions for the meta data column
-     * @param $item
-     * @return string
-     */
-    function column_post_step_metadata( $item ){
-        //Build row actions
-        $actions = array(
-            'edit_metadata' => sprintf('<a href="#" class="edit-gd-metadata-inline" id="edit-gd-metadata-inline-%s" data-postid="%s">Edit</a>' , $item->ID, $item->ID),
-        );
-
-        $post_step_metadata = get_post_meta( $item->ID, '_gd_step_metadata', true);
-        $post_step_metadata = empty( $post_step_metadata ) ? '&nbsp;' : $post_step_metadata;
-        //Return the title contents
-        return sprintf('%1$s %2$s %3$s',
-            /*$1%s*/ $post_step_metadata,
-            /*$2%s*/ $this->row_actions($actions),
-            /*$3%s*/ $this->render_progress_pt_choice_form( $item->ID )
-        );
     }
 
 
@@ -178,7 +165,7 @@ class GD_Progress_Pts_Table extends WP_List_Table {
 
 	        $delete_choice = '<span id="delete-choice-' . $choice_id . '" class="delete-choice delete" data-choiceid="' . $choice_id . '" data-postid="' . $progress_pt_id . '">Delete</span>';
 	        $save_choice = '<span id="save-choice-' . $choice_id . '" class="save-choice save" data-choiceid="' . $choice_id . '" data-postid="' . $progress_pt_id . '">Save Changes</span>';
-	        $settings = '<div id="choice-settings-' . $choice_id . '" class="choice-settings"> ' . $delete_choice . ' | ' . $save_choice . '</div>';
+	        $settings = '<div id="choice-settings-' . $choice_id . '" class="choice-settings"> ' . $save_choice . ' | ' . $delete_choice . '</div>';
 
             $choice_html .= $this->render_progress_pts_dropdown( 'choice-goto-' . $choice_id . '-' . $progress_pt_id, 'Goes to step: ', $choice['choice_goto_id'], $settings);
         $choice_html .= '</div>';

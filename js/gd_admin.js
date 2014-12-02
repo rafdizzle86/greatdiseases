@@ -186,6 +186,7 @@
                 $.ajax({
                     url: ajaxurl,
                     type: 'POST',
+                    dataType: 'json',
                     data: {
                         action: 'gd_save_choice_settings',
                         gd_admin_nonce: gd_admin_nonce,
@@ -196,7 +197,7 @@
                     },
                     success: function(data, textStatus, jqXHR){
                         if( data.success ){
-                            console.log(data);
+                            alert('Changes successfully saved.');
                         }else{
                             alert('Something went wrong!');
                         }
@@ -208,12 +209,35 @@
             });
         },
 
+        /**
+         * Uses jEditable on the meta data field
+         * @param metaDataElem
+         */
+        initEditableMetaData: function( metaDataElem ){
+            var gd_admin_nonce = $('#gd_admin_nonce').val();
+            $( metaDataElem).editable(
+                ajaxurl,
+                {
+                    cssclass: 'gd_metadata_input',
+                    placeholder: '<span style="color: lightgrey;"><small>Click to edit</small></span>',
+                    indicator: 'Saving...',
+                    onblur: 'submit',
+                    submitdata: {
+                        action: 'gd_save_metadata',
+                        gd_admin_nonce: gd_admin_nonce,
+                        stepid: $(this).data('stepid')
+                    }
+                }
+            );
+        },
+
         init: function(){
 
             // Handlers for 'Save Choice', 'Is Milestone' and 'Is Visible' checkboxes/buttons
             this.saveChoiceSettings( $( '.save-choice' ) );
             this.selectIsVisible( $( '.is-visible-checkbox') );
             this.selectMilestone( $( '.is-milestone-checkbox' ) );
+            this.initEditableMetaData( $( '.gd_metadata_editable' ) );
 
             // Make admin table sortable
             $('.gd_list_progress_pts #the-list').sortable({

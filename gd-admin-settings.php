@@ -21,11 +21,13 @@ class GD_Settings_Page
         add_action( 'wp_ajax_gd_add_new_choice', array( $this, 'gd_add_new_choice') );
         add_action( 'wp_ajax_gd_delete_step_choice', array( $this, 'gd_delete_step_choice') );
         add_action( 'wp_ajax_gd_set_step_order', array( $this, 'gd_set_step_order') );
+        add_action( 'wp_ajax_gd_save_metadata', array( $this, 'gd_save_metadata') );
         add_action( 'admin_head', array( &$this, 'admin_header' ) );
 
         if( is_admin() ){
             wp_enqueue_script( 'jquery-form' );
             wp_enqueue_script( 'gd_admin_js', get_template_directory_uri() . '/js/gd_admin.js' );
+            wp_enqueue_style( 'jquery_editable', get_template_directory_uri() . '/js/jquery.jeditable.mini.js' );
             wp_enqueue_style( 'gd_admin_css', get_template_directory_uri() . '/css/gd_admin.css' );
         }
     }
@@ -36,8 +38,8 @@ class GD_Settings_Page
             return;
 
         echo '<style type="text/css">';
-        echo '.wp-list-table .column-post_title { width: 70%; }';
-        echo '.wp-list-table .column-post_step_metadata { width: 10%; }';
+        echo '.wp-list-table .column-post_title { width: 60%; }';
+        echo '.wp-list-table .column-post_step_metadata { width: 20%; }';
         echo '.wp-list-table .column-post_is_milestone { width: 10%; }';
         echo '.wp-list-table .column-post_is_visible { width: 10%; }';
         echo '</style>';
@@ -335,7 +337,7 @@ class GD_Settings_Page
 
         $post_id = (int) $_POST['postID'];
         $choice_id = (int) $_POST['choiceID'];
-        $choice_txt = (string) $_POST['choiceText'];
+        $choice_txt = $_POST['choiceText'];
         $choice_goto_id = (int) $_POST['nextStep'];
 
         $choices = get_post_meta( $post_id, '_gd_progress_pt_choices', true);
@@ -346,16 +348,14 @@ class GD_Settings_Page
          */
         if( !empty( $choices ) && is_array( $choices ) ){
             if( isset( $choices[ $choice_id ] ) ){
-                $choice = $choices[ $choice_id ];
+                $choice = &$choices[ $choice_id ];
                 $choice['choice_title'] = $choice_txt;
                 $choice['choice_goto_id'] = $choice_goto_id;
             }
+            $success = update_post_meta( $post_id, '_gd_progress_pt_choices', $choices );
         }
 
-        $success = update_post_meta( $post_id, '_gd_progress_pt_choices', $choices );
-
         echo json_encode( array( 'success' => $success ) );
-
         exit;
     }
 
@@ -410,6 +410,30 @@ class GD_Settings_Page
 		echo json_encode( array( 'success' => $success ) );
 		exit;
 	}
+
+    /**
+     * Saves metadata of a step (uses jEditable)
+     */
+    function gd_save_metadata(){
+        $nonce = $_POST[ 'gd_admin_nonce' ];
+        if( !wp_verify_nonce( $nonce, 'gd_add_new_choice' ) ){
+            header("HTTP/1.0 409 Security Check.");
+            exit;
+        }
+
+        if( empty( $_POST['id'] ) ){
+            header("HTTP/1.0 409 Could not locate post ID.");
+            exit;
+        }
+
+        $post_id = (int) $_POST['id'];
+        $meta_value = $_POST['value'];
+
+        $success = update_post_meta( $post_id, '_gd_step_metadata', $meta_value );
+        error_log( $success );
+        echo $meta_value;
+        exit;
+    }
 
     /**
      * Adds a new choice to a decision tree step
