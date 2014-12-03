@@ -27,10 +27,11 @@
     cursor: pointer;
 }
 
-.gd_metadata_editable:hover{
+.gd_metadata_editable:hover,
+.gd_post_title_editable:hover{
     font-weight: bold;
 }
-.gd_metadata_editable{
+.gd_metadata_editable, .gd_post_title_editable{
     cursor: pointer;
 }
 .gd_metadata_input input{
@@ -76,4 +77,13 @@ span.step-sorting-handle:after{
     padding-bottom: 22px;
     margin-left: 10px;
     background: #F2F2F2;
+}
+
+.wp-admin select{
+    white-space: nowrap;
+    max-width: 235px;
+}
+
+button.new-progress-pt-choice{
+    margin-top: 2px !important;
 }

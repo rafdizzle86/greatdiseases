@@ -30,11 +30,6 @@ class GD_Progress_Pts_Table extends WP_List_Table {
                 $post_step_metadata = '<span class="gd_metadata_editable" id="metadata-' . $item->ID . '" data-stepid="' . $item->ID . '">' . $post_step_metadata  . '</span>';
                 return $post_step_metadata;
 
-            case 'post_is_visible':
-                $is_visible = get_post_meta( $item->ID, '_gd_is_visible', true);
-                $is_visible = $is_visible == 'true' ? 'checked' : '';
-                return '<input type="checkbox" class="is-visible-checkbox" id="is-visible-' . $item->ID . '" data-postid="' . $item->ID .'" name="is-visible-' . $item->ID . '" ' . $is_visible . ' />';
-
             case 'post_title':
                 return $item->$column_name;
 
@@ -127,7 +122,7 @@ class GD_Progress_Pts_Table extends WP_List_Table {
             $choice_form .= 'Choice text: <input type="text" id="new-progress-pt-choice-title-' . $progress_pt_id . '"> ';
 
             $add_new_choice_button = ' <button type="button" class="new-progress-pt-choice button" id="new-progress-pt-choice-' . $progress_pt_id .'" data-postid="' . $progress_pt_id . '">Add new choice</button>';
-            $choice_form .= $this->render_progress_pts_dropdown( 'new-progress-pt-choice-goto-' . $progress_pt_id, 'Go to step:', '', $add_new_choice_button );
+            $choice_form .= $this->render_progress_pts_dropdown( 'new-progress-pt-choice-goto-' . $progress_pt_id, 'Goes to step: ', '', $add_new_choice_button );
 
             $choice_form .= '<div id="gd-progress-pt-existing-choices-' . $progress_pt_id .'" class="gd-progress-pt-existing-choices">';
                 $choice_form .= $this->render_progress_pt_choices( $progress_pt_id, '<p><b>Existing Choices:</b></p><form id="choice-form-' . $progress_pt_id  .'">', '</form>' );
@@ -164,7 +159,7 @@ class GD_Progress_Pts_Table extends WP_List_Table {
     function render_progress_pt_choice( $choice, $choice_id, $progress_pt_id ){
 
 	    $choice_html = '<div id="choice-' . $choice_id .'-' . $progress_pt_id . '" class="gd-progress-pt-choice">';
-            $choice_html .= 'Text: <input type="text" id="choice-text-' . $choice_id . '" value="' . $choice['choice_title'] . '"> ';
+            $choice_html .= 'Choice Text: <input type="text" id="choice-text-' . $choice_id . '" value="' . $choice['choice_title'] . '"> ';
 
 	        $delete_choice = '<span id="delete-choice-' . $choice_id . '" class="delete-choice delete" data-choiceid="' . $choice_id . '" data-postid="' . $progress_pt_id . '">Delete</span>';
 	        $save_choice = '<span id="save-choice-' . $choice_id . '" class="save-choice save" data-choiceid="' . $choice_id . '" data-postid="' . $progress_pt_id . '">Save Changes</span>';
@@ -273,7 +268,6 @@ class GD_Progress_Pts_Table extends WP_List_Table {
             'post_title' => __('Step Title'),
             'post_step_metadata' => __('Meta Data'),
             'post_is_milestone' => __('Is Milestone'),
-            'post_is_visible' => __('Is Visible'),
             'post_order' => __('Order')
         );
     }

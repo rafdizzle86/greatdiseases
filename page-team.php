@@ -115,6 +115,7 @@
                         <h2>Team Progress:</h2>
                         <div class="clear"></div>
                         <?php
+                        /*
                         // check if the team has made a Cholera or TB decision, which will filter the query
                         $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
 
@@ -143,6 +144,7 @@
                             }
                         }
 
+
                         if ( $gd_query->have_posts() ) {
                             echo '<ol class="progress-meter">';
                             while ( $gd_query->have_posts() ) {
@@ -160,8 +162,7 @@
                                     }
                                 }
 
-                                $is_visible = get_post_meta( get_the_ID(), '_gd_is_visible', true );
-	                            $is_visible = ($is_visible == 'true') ? true : false;
+
                                 $step_tag = get_post_meta( get_the_ID(), '_gd_step_metadata', true);
 
                                 // determines based off "Cholera" or "TB" decision in "Pick a disease" step
@@ -173,7 +174,7 @@
                                     }
                                 }
 
-                                if( is_object( $progress_pt_page ) && $is_visible && $show_step ){
+                                if( is_object( $progress_pt_page ) && $show_step ){
                                     $step_html = '<li class="' . $progress_class . '">';
                                         $step_html .= '<a href="' . get_permalink( $progress_pt_page->ID )  .'">' . $progress_pt_page->post_title  . '</a>';
                                     $step_html .= '</li>';
@@ -187,6 +188,7 @@
                             echo '</ol>';
                         }
                         wp_reset_postdata();
+                        */
                         ?>
                         <div class="clear"></div>
                     </div>
@@ -266,6 +268,7 @@
                         } else {
                             // no posts found
                         }
+
                         /* Restore original Post Data */
                         $wp_query->is_singular = true;
                         wp_reset_postdata();
