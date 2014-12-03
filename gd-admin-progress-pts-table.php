@@ -27,7 +27,7 @@ class GD_Progress_Pts_Table extends WP_List_Table {
             case 'post_step_metadata':
                 $post_step_metadata = get_post_meta( $item->ID, '_gd_step_metadata', true);
                 $post_step_metadata = empty( $post_step_metadata ) ? '' : $post_step_metadata;
-                $post_step_metadata = '<span class="gd_metadata_editable" id="' . $item->ID . '">' . $post_step_metadata  . '</span>';
+                $post_step_metadata = '<span class="gd_metadata_editable" id="metadata-' . $item->ID . '" data-stepid="' . $item->ID . '">' . $post_step_metadata  . '</span>';
                 return $post_step_metadata;
 
             case 'post_is_visible':
@@ -37,6 +37,9 @@ class GD_Progress_Pts_Table extends WP_List_Table {
 
             case 'post_title':
                 return $item->$column_name;
+
+            case 'post_order':
+                return '<span class="step-sorting-handle"></span>';
 
             default:
                 return ''; //Show the whole array for troubleshooting purposes
@@ -72,7 +75,7 @@ class GD_Progress_Pts_Table extends WP_List_Table {
 
         //Return the title contents
         return sprintf('%1$s %2$s %3$s',
-            /*$1%s*/ $item->post_title,
+            /*$1%s*/ '<span class="gd_post_title_editable" data-stepid="' . $item->ID . '">' . $item->post_title . '</span>',
             /*$2%s*/ $this->row_actions($actions),
             /*$3%s*/ $this->render_progress_pt_choice_form( $item->ID )
         );
@@ -271,6 +274,7 @@ class GD_Progress_Pts_Table extends WP_List_Table {
             'post_step_metadata' => __('Meta Data'),
             'post_is_milestone' => __('Is Milestone'),
             'post_is_visible' => __('Is Visible'),
+            'post_order' => __('Order')
         );
     }
 

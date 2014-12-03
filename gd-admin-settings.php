@@ -22,6 +22,7 @@ class GD_Settings_Page
         add_action( 'wp_ajax_gd_delete_step_choice', array( $this, 'gd_delete_step_choice') );
         add_action( 'wp_ajax_gd_set_step_order', array( $this, 'gd_set_step_order') );
         add_action( 'wp_ajax_gd_save_metadata', array( $this, 'gd_save_metadata') );
+        add_action( 'wp_ajax_gd_save_post_title', array( $this, 'gd_save_post_title') );
         add_action( 'admin_head', array( &$this, 'admin_header' ) );
 
         if( is_admin() ){
@@ -39,9 +40,10 @@ class GD_Settings_Page
 
         echo '<style type="text/css">';
         echo '.wp-list-table .column-post_title { width: 60%; }';
-        echo '.wp-list-table .column-post_step_metadata { width: 20%; }';
+        echo '.wp-list-table .column-post_step_metadata { width: 15%; }';
         echo '.wp-list-table .column-post_is_milestone { width: 10%; }';
         echo '.wp-list-table .column-post_is_visible { width: 10%; }';
+        echo '.wp-list-table .column-post_order { width: 5%; }';
         echo '</style>';
     }
 
@@ -414,6 +416,35 @@ class GD_Settings_Page
     /**
      * Saves metadata of a step (uses jEditable)
      */
+    function gd_save_post_title(){
+        $nonce = $_POST[ 'gd_admin_nonce' ];
+        if( !wp_verify_nonce( $nonce, 'gd_add_new_choice' ) ){
+            header("HTTP/1.0 409 Security Check.");
+            exit;
+        }
+
+        if( empty( $_POST['stepid'] ) ){
+            header("HTTP/1.0 409 Could not locate post ID.");
+            exit;
+        }
+
+        $post_id = (int) $_POST['stepid'];
+        $post_title = $_POST['value'];
+
+        $the_post = array(
+            'ID'         => $post_id,
+            'post_title' => $post_title
+        );
+
+        wp_update_post( $the_post );
+
+        echo $post_title;
+        exit;
+    }
+
+    /**
+     * Saves metadata of a step (uses jEditable)
+     */
     function gd_save_metadata(){
         $nonce = $_POST[ 'gd_admin_nonce' ];
         if( !wp_verify_nonce( $nonce, 'gd_add_new_choice' ) ){
@@ -421,16 +452,16 @@ class GD_Settings_Page
             exit;
         }
 
-        if( empty( $_POST['id'] ) ){
+        if( empty( $_POST['stepid'] ) ){
             header("HTTP/1.0 409 Could not locate post ID.");
             exit;
         }
 
-        $post_id = (int) $_POST['id'];
+        $post_id = (int) $_POST['stepid'];
         $meta_value = $_POST['value'];
 
         $success = update_post_meta( $post_id, '_gd_step_metadata', $meta_value );
-        error_log( $success );
+
         echo $meta_value;
         exit;
     }

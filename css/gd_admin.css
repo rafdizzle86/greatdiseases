@@ -34,6 +34,46 @@
     cursor: pointer;
 }
 .gd_metadata_input input{
-    min-width: 200px;
+    min-width: 150px;
     min-height: 30px;
+}
+span.step-sorting-handle:before{
+    right: 0;
+    content: '\f142';
+    font: normal 20px/1 'dashicons';
+    speak: none;
+    display: inline-block;
+    top: 2px;
+    position: absolute;
+    vertical-align: bottom;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-decoration: none !important;
+    color: #bbb;
+}
+
+span.step-sorting-handle:after{
+    right: 0;
+    content: '\f140';
+    font: normal 20px/1 'dashicons';
+    speak: none;
+    display: inline-block;
+    bottom: 2px;
+    position: absolute;
+    vertical-align: bottom;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-decoration: none !important;
+    color: #bbb;
+}
+
+.step-sorting-handle{
+    position: relative;
+    border: 1px solid silver;
+    cursor: move;
+    padding-left: 0px;
+    padding-right: 18px;
+    padding-bottom: 22px;
+    margin-left: 10px;
+    background: #F2F2F2;
 }

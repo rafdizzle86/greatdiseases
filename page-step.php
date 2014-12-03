@@ -98,7 +98,8 @@
                     if( $team_id > 0 ){
                         // Show choices only if there is a submitted post and the current step is a milestone step
                         // @todo: This binds "Milestone" steps with required submissions
-                        $is_milestone = (bool) get_post_meta( get_the_ID(), '_gd_is_milestone', true );
+                        $is_milestone = get_post_meta( get_the_ID(), '_gd_is_milestone', true );
+                        $is_milestone = ($is_milestone == 'true') ? true : false;
                         $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
 
                         if( !isset( $team_progress[ get_the_ID() ] ) && $is_milestone ){
@@ -136,7 +137,7 @@
                         $step_choices = get_post_meta( get_the_ID(), '_gd_progress_pt_choices', true);
                         if( !empty( $step_choices ) ){
                             echo '<div class="gd-choices">';
-                            echo '<h2>Congrats! You\'ve submitted your argument, now you can confirm your decision by clicking on the choice you\'ve made:</h2>';
+                            echo '<h2>Continue to the next step:</h2>';
 
                             // Filters steps before they are shown
                             $gd_steps = apply_filters( 'gd_choice_html', $step_choices );

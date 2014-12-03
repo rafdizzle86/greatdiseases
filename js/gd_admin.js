@@ -210,6 +210,30 @@
         },
 
         /**
+         * Make step titles editable using jEditable
+         * @param titleElem
+         */
+        initEditableStepTitle: function( titleElem ){
+            var gd_admin_nonce = $('#gd_admin_nonce').val();
+            $( titleElem ).editable(
+                ajaxurl,
+                {
+                    cssclass: 'gd_metadata_input',
+                    placeholder: '<span style="color: lightgrey;"><small>Click to edit</small></span>',
+                    indicator: 'Saving...',
+                    onblur: 'submit',
+                    submitdata: function(value, settings) {
+                        return {
+                            action: 'gd_save_post_title',
+                            gd_admin_nonce: gd_admin_nonce,
+                            stepid: $(this).data('stepid')
+                        };
+                    }
+                }
+            );
+        },
+
+        /**
          * Uses jEditable on the meta data field
          * @param metaDataElem
          */
@@ -222,10 +246,12 @@
                     placeholder: '<span style="color: lightgrey;"><small>Click to edit</small></span>',
                     indicator: 'Saving...',
                     onblur: 'submit',
-                    submitdata: {
-                        action: 'gd_save_metadata',
-                        gd_admin_nonce: gd_admin_nonce,
-                        stepid: $(this).data('stepid')
+                    submitdata: function(value, settings) {
+                        return {
+                            action: 'gd_save_metadata',
+                            gd_admin_nonce: gd_admin_nonce,
+                            stepid: $(this).data('stepid')
+                        };
                     }
                 }
             );
@@ -238,9 +264,11 @@
             this.selectIsVisible( $( '.is-visible-checkbox') );
             this.selectMilestone( $( '.is-milestone-checkbox' ) );
             this.initEditableMetaData( $( '.gd_metadata_editable' ) );
+            this.initEditableStepTitle( $( '.gd_post_title_editable' ) );
 
             // Make admin table sortable
             $('.gd_list_progress_pts #the-list').sortable({
+                handle: ".step-sorting-handle",
                 stop: function( event, ui ){
                     var sortedIDs = $( ".gd_list_progress_pts #the-list" ).sortable( "toArray" );
                     var gd_admin_nonce = $('#gd_admin_nonce').val();
