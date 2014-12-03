@@ -2,6 +2,9 @@
 // Great Diseases config
 include_once( 'gd-admin-settings.php' );
 
+//Our class extends the WP_List_Table class, so we need to make sure that it's there
+include_once( 'gd-admin-progress-pts-table.php' );
+
 /**
  * Records the decision of each step
  */

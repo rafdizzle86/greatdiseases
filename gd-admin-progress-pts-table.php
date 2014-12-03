@@ -122,7 +122,7 @@ class GD_Progress_Pts_Table extends WP_List_Table {
             $choice_form .= 'Choice text: <input type="text" id="new-progress-pt-choice-title-' . $progress_pt_id . '"> ';
 
             $add_new_choice_button = ' <button type="button" class="new-progress-pt-choice button" id="new-progress-pt-choice-' . $progress_pt_id .'" data-postid="' . $progress_pt_id . '">Add new choice</button>';
-            $choice_form .= $this->render_progress_pts_dropdown( 'new-progress-pt-choice-goto-' . $progress_pt_id, 'Goes to step: ', '', $add_new_choice_button );
+            $choice_form .= GD_Settings_Page::render_progress_pts_dropdown( 'new-progress-pt-choice-goto-' . $progress_pt_id, 'Goes to step: ', '', $add_new_choice_button );
 
             $choice_form .= '<div id="gd-progress-pt-existing-choices-' . $progress_pt_id .'" class="gd-progress-pt-existing-choices">';
                 $choice_form .= $this->render_progress_pt_choices( $progress_pt_id, '<p><b>Existing Choices:</b></p><form id="choice-form-' . $progress_pt_id  .'">', '</form>' );
@@ -165,44 +165,10 @@ class GD_Progress_Pts_Table extends WP_List_Table {
 	        $save_choice = '<span id="save-choice-' . $choice_id . '" class="save-choice save" data-choiceid="' . $choice_id . '" data-postid="' . $progress_pt_id . '">Save Changes</span>';
 	        $settings = '<div id="choice-settings-' . $choice_id . '" class="choice-settings"> ' . $save_choice . ' | ' . $delete_choice . '</div>';
 
-            $choice_html .= $this->render_progress_pts_dropdown( 'choice-goto-' . $choice_id . '-' . $progress_pt_id, 'Goes to step: ', $choice['choice_goto_id'], $settings);
+            $choice_html .= GD_Settings_Page::render_progress_pts_dropdown( 'choice-goto-' . $choice_id . '-' . $progress_pt_id, 'Goes to step: ', $choice['choice_goto_id'], $settings);
         $choice_html .= '</div>';
 
         return $choice_html;
-    }
-
-    /**
-     * Renders a drop-down of all the progress points with an optional select_id
-     * that selects one by default
-     * @param string $drop_down_id
-     * @param string $before_txt
-     * @param string $select_id
-     * @param string $after_txt
-     * @return string
-     */
-    function render_progress_pts_dropdown( $drop_down_id, $before_txt = '', $select_id = '', $after_txt = '' ){
-
-        $gd_progress_pts = get_option( 'gd_progress_pts' );
-
-        $drop_down_html = '';
-
-        if( !empty( $gd_progress_pts ) && is_array( $gd_progress_pts ) ){
-            $drop_down_html = $before_txt;
-            $drop_down_html .= '<select id="' . $drop_down_id . '">';
-
-            foreach( $gd_progress_pts as $progress_pt_id ){
-                $progress_pt_post = get_post( $progress_pt_id );
-                $meta_data = get_post_meta( $progress_pt_id, '_gd_step_metadata', true );
-                $meta_data = !empty( $meta_data ) ? '(' . $meta_data . ')' : '';
-                $selected = $progress_pt_id == $select_id ? 'selected' : '';
-                $drop_down_html .= '<option id="progress-pt-' . $progress_pt_id .'" value="' . $progress_pt_id . '" ' . $selected . '>' . $progress_pt_post->post_title . ' ' . $meta_data . '</option>';
-            }
-
-            $drop_down_html .= '</select>';
-            $drop_down_html .= $after_txt;
-        }
-
-        return $drop_down_html;
     }
 
     /** ************************************************************************

@@ -111,8 +111,6 @@ class GD_Settings_Page
             'gd-setting-admin', // Page
             'gd_progress_pt_section' // Section
         );
-        //Our class extends the WP_List_Table class, so we need to make sure that it's there
-        require_once( __DIR__ . '/gd-admin-progress-pts-table.php' );
     }
 
     /**
@@ -122,36 +120,113 @@ class GD_Settings_Page
     {
         // Set class property
         $this->options = get_option( 'gd_progress_pts' );
+
+        $tab = 'gd_steps';
+        if ( isset ( $_GET['tab'] ) ) {
+            $tab = $_GET['tab'];
+        }
         ?>
         <div class="wrap">
             <h2>Great Diseases Site Settings</h2>
 
-            <form method="post" action="options.php">
-                <?php
-                // This prints out all hidden setting fields
-                settings_fields( 'gd_option_group' );
-                do_settings_sections( 'gd-setting-admin' );
-                submit_button( 'Create new step' );
+            <h2 class="nav-tab-wrapper">
+                <a class='nav-tab<?php echo ( $tab == 'gd_steps' ) ? ' nav-tab-active' : ''; ?>'  href='?page=gd-setting-admin&tab=gd_steps'>Decision Tree Steps</a>
+                <a class='nav-tab<?php echo ( $tab == 'gd_progress_tracker' ) ? ' nav-tab-active' : ''; ?>' href='?page=gd-setting-admin&tab=gd_progress_tracker'>Progress Tracker Settings</a>
+            </h2>
+
+            <?php
+            if( $tab == 'gd_steps' ) {
                 ?>
-            </form>
-
-            <div id="gd-steps">
-                <h3>Current progress/steps:</h3>
-                <!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
-                <form id="gd_list_progress_pts-filter" method="get">
-                    <!-- For plugins, we also need to ensure that the form posts back to our current page -->
-                    <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
+                <form method="post" action="options.php">
                     <?php
-                    $wp_list_table = new GD_Progress_Pts_Table();
-                    $wp_list_table->prepare_items();
-                    $wp_list_table->display();
-
-                    wp_nonce_field( 'gd_add_new_choice', 'gd_admin_nonce', false );
+                    // This prints out all hidden setting fields
+                    settings_fields('gd_option_group');
+                    do_settings_sections('gd-setting-admin');
+                    submit_button('Create new step');
                     ?>
                 </form>
-            </div>
+
+                <div id="gd-steps">
+                    <h3>Current progress/steps:</h3>
+                    <!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
+                    <form id="gd_list_progress_pts-filter" method="get">
+                        <!-- For plugins, we also need to ensure that the form posts back to our current page -->
+                        <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>"/>
+                        <?php
+                        $wp_list_table = new GD_Progress_Pts_Table();
+                        $wp_list_table->prepare_items();
+                        $wp_list_table->display();
+
+                        wp_nonce_field('gd_add_new_choice', 'gd_admin_nonce', false);
+                        ?>
+                    </form>
+                </div>
+            <?php
+            }else if( $tab == 'gd_progress_tracker') {
+                self::render_progress_bar_settings();
+            }
+            ?>
         </div>
     <?php
+    }
+
+    /**
+     * Render the progress tracker settings tabs
+     */
+    function render_progress_bar_settings(){
+        $gd_steps = get_option( 'gd_progress_pts' );
+        ?>
+        <h2>Progress Tracker Settings</h2>
+        <p>Settings for the progress tracker that displayed on the team page.</p>
+        <p>Add a new progress step:</p>
+        <table>
+            <tr  style="vertical-align: text-top;">
+                <td>Step:</td>
+                <td><input type="text"></td>
+                <td>is displayed as "completed" if the following step(s) is/are completed:</td>
+                <td>
+                    <?php echo self::render_progress_pts_dropdown( 'gd_steps_dropdown' ); ?> <button id="gd_progress_tracker_new_step" class="button">Add</button>
+                    <br />
+                    <div id="required-completed-step"></div>
+                </td>
+            </tr>
+        </table>
+        <button id="gd-progress-tracker-settings-submit" class="button button-primary">Submit</button>
+        <?php
+    }
+
+    /**
+     * Renders a drop-down of all the progress points with an optional select_id
+     * that selects one by default
+     * @param string $drop_down_id
+     * @param string $before_txt
+     * @param string $select_id
+     * @param string $after_txt
+     * @return string
+     */
+    public static function render_progress_pts_dropdown( $drop_down_id, $before_txt = '', $select_id = '', $after_txt = '' ){
+
+        $gd_progress_pts = get_option( 'gd_progress_pts' );
+
+        $drop_down_html = '';
+
+        if( !empty( $gd_progress_pts ) && is_array( $gd_progress_pts ) ){
+            $drop_down_html = $before_txt;
+            $drop_down_html .= '<select id="' . $drop_down_id . '">';
+
+            foreach( $gd_progress_pts as $progress_pt_id ){
+                $progress_pt_post = get_post( $progress_pt_id );
+                $meta_data = get_post_meta( $progress_pt_id, '_gd_step_metadata', true );
+                $meta_data = !empty( $meta_data ) ? '(' . $meta_data . ')' : '';
+                $selected = $progress_pt_id == $select_id ? 'selected' : '';
+                $drop_down_html .= '<option id="progress-pt-' . $progress_pt_id .'" value="' . $progress_pt_id . '" ' . $selected . '>' . $progress_pt_post->post_title . ' ' . $meta_data . '</option>';
+            }
+
+            $drop_down_html .= '</select>';
+            $drop_down_html .= $after_txt;
+        }
+
+        return $drop_down_html;
     }
 
     /**

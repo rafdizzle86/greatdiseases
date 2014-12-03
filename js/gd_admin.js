@@ -257,6 +257,24 @@
             );
         },
 
+        /**
+         * Handles adding "required" steps for the progress tracker
+         * @param addElem
+         */
+        initProgressTrackerStepAdder: function( addElem ){
+            $( addElem).click(function(){
+                var selected_step = $('#gd_steps_dropdown option:selected').text();
+                var selected_step_id = $('#gd_steps_dropdown option:selected').val();
+                var andOrDropdown = '<select id="' + selected_step_id + '-bool"><option>or</option><option>and</option></select>';
+
+                if( $('#required-completed-step').children().length > 0 ){
+                    $('<p id="step-' + selected_step_id + '"  data-stepid="' + selected_step_id + '">' + selected_step + ' ' + andOrDropdown + '</p>').prependTo('#required-completed-step');
+                }else{
+                    $("<p>" + selected_step + "</p>").prependTo('#required-completed-step');
+                }
+            });
+        },
+
         init: function(){
 
             // Handlers for 'Save Choice', 'Is Milestone' and 'Is Visible' checkboxes/buttons
@@ -265,6 +283,7 @@
             this.selectMilestone( $( '.is-milestone-checkbox' ) );
             this.initEditableMetaData( $( '.gd_metadata_editable' ) );
             this.initEditableStepTitle( $( '.gd_post_title_editable' ) );
+            this.initProgressTrackerStepAdder( '#gd_progress_tracker_new_step' );
 
             // Make admin table sortable
             $('.gd_list_progress_pts #the-list').sortable({
