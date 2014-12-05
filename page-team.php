@@ -118,16 +118,6 @@
                         // Get progress the teams have made
                         $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
 
-                        $steps = array(
-                            'Pick a disease',
-                            'Select a drug compound',
-                            'Day 3: Screening Drug Efficacy & Toxicity',
-                            'Day 4: Phase 1 Clinical Trial',
-                            'Day 5: Phases 2/3 Clinical Trials',
-                            'FDA Report',
-                            'Career Debrief'
-                        );
-
                         /*
                         // check if the team has made a Cholera or TB decision, which will filter the query
                         $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );

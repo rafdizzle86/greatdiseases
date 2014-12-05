@@ -23,6 +23,8 @@ class GD_Settings_Page
         add_action( 'wp_ajax_gd_set_step_order', array( $this, 'gd_set_step_order') );
         add_action( 'wp_ajax_gd_save_metadata', array( $this, 'gd_save_metadata') );
         add_action( 'wp_ajax_gd_save_post_title', array( $this, 'gd_save_post_title') );
+        add_action( 'wp_ajax_gd_set_progress_tracker_steps', array( $this, 'gd_set_progress_tracker_steps') );
+
         add_action( 'admin_head', array( &$this, 'admin_header' ) );
 
         if( is_admin() ){
@@ -38,11 +40,16 @@ class GD_Settings_Page
         if( 'gd-setting-admin' != $page )
             return;
 
+
         echo '<style type="text/css">';
         echo '.wp-list-table .column-post_title { width: 70%; }';
         echo '.wp-list-table .column-post_step_metadata { width: 15%; }';
         echo '.wp-list-table .column-post_is_milestone { width: 10%; }';
         echo '.wp-list-table .column-post_order { width: 5%; }';
+
+        echo '#required-completed-steps .column-step_title  { width: 80%; }';
+        echo '#required-completed-steps .column-step_logic  { width: 10%; }';
+        echo '#required-completed-steps .column-step_delete { width: 10%; }';
         echo '</style>';
     }
 
@@ -156,8 +163,6 @@ class GD_Settings_Page
                         $wp_list_table = new GD_Progress_Pts_Table();
                         $wp_list_table->prepare_items();
                         $wp_list_table->display();
-
-                        wp_nonce_field('gd_add_new_choice', 'gd_admin_nonce', false);
                         ?>
                     </form>
                 </div>
@@ -165,6 +170,7 @@ class GD_Settings_Page
             }else if( $tab == 'gd_progress_tracker') {
                 self::render_progress_bar_settings();
             }
+            wp_nonce_field('gd_add_new_choice', 'gd_admin_nonce', false);
             ?>
         </div>
     <?php
@@ -180,17 +186,25 @@ class GD_Settings_Page
         <p>Settings for the progress tracker that displayed on the team page.</p>
         <p>Add a new progress step:</p>
         <table>
-            <tr  style="vertical-align: text-top;">
+            <tr style="vertical-align: text-top;">
                 <td>Step:</td>
-                <td><input type="text"></td>
+                <td><input type="text" id="progress-tracker-step-name" name="progress-tracker-step-name" placeholder="Enter step name"></td>
                 <td>is displayed as "completed" if the following step(s) is/are completed:</td>
                 <td>
                     <?php echo self::render_progress_pts_dropdown( 'gd_steps_dropdown' ); ?> <button id="gd_progress_tracker_new_step" class="button">Add</button>
-                    <br />
-                    <div id="required-completed-step"></div>
                 </td>
             </tr>
         </table>
+        <table id="required-completed-steps" style="width: 100%; display: none;">
+            <thead>
+            <tr>
+                <td class="column-step_title"><b>Step Title</b></td>
+                <td class="column-step_logic"><b>Logic</b></td>
+                <td class="column-step_delete"><b>Remove</b></td>
+            </tr>
+            </thead>
+        </table>
+        <br />
         <button id="gd-progress-tracker-settings-submit" class="button button-primary">Submit</button>
         <?php
     }
@@ -456,6 +470,41 @@ class GD_Settings_Page
 
         $success = update_post_meta( $post_id, '_gd_is_visible', $is_visible );
         echo json_encode( array( 'success' => $success ) );
+        exit;
+    }
+
+    /**
+     * AJAX call to set the progress tracker steps
+     */
+    function gd_set_progress_tracker_steps(){
+        $nonce = $_POST[ 'gd_admin_nonce' ];
+        if( !wp_verify_nonce( $nonce, 'gd_add_new_choice' ) ){
+            header("HTTP/1.0 409 Security Check.");
+            exit;
+        }
+
+        if( empty( $_POST['stepText'] ) ){
+            header("HTTP/1.0 409 Please enter step text before continuing.");
+            exit;
+        }
+
+        $step_text = $_POST['stepText'];
+
+        $gd_progress_tracker_steps = get_option( 'gd_progress_tracker_steps' );
+
+        if( empty( $gd_progress_tracker_steps ) ){
+            $gd_progress_tracker_steps = array();
+        }
+
+
+
+        /*
+        if( count( $_POST['requiredSteps'] ) == 0 ){
+            $success = update_option( 'gd_progress_tracker_data', array() );
+        }else{
+            $success = update_option( 'gd_progress_tracker_data', $_POST['stepData'] );
+        }*/
+        echo json_encode( array( 'success' => $success) );
         exit;
     }
 

@@ -73,7 +73,6 @@
                     <div id="post-thumb-<?php the_ID() ?>" class="post-thumb"><?php the_post_thumbnail( array(100, 100) ); ?></php></div>
                     <?php
 
-
                     $team_id = 0;
                     if( is_user_logged_in() ){
                         if( class_exists( 'CTXPS_Queries') ){

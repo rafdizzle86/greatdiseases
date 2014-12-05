@@ -262,16 +262,81 @@
          * @param addElem
          */
         initProgressTrackerStepAdder: function( addElem ){
-            $( addElem).click(function(){
+            addElem.click(function(){
                 var selected_step = $('#gd_steps_dropdown option:selected').text();
                 var selected_step_id = $('#gd_steps_dropdown option:selected').val();
                 var andOrDropdown = '<select id="' + selected_step_id + '-bool"><option>or</option><option>and</option></select>';
 
-                if( $('#required-completed-step').children().length > 0 ){
-                    $('<p id="step-' + selected_step_id + '"  data-stepid="' + selected_step_id + '">' + selected_step + ' ' + andOrDropdown + '</p>').prependTo('#required-completed-step');
-                }else{
-                    $("<p>" + selected_step + "</p>").prependTo('#required-completed-step');
+                var stepTable = $('#required-completed-steps');
+
+                if( !stepTable.is(":visible") ){
+                    stepTable.show();
                 }
+
+                if( stepTable.children().length > 1 ){
+                    $('<tr class="required-step"><td>' +
+                            selected_step + '<input type="hidden" id="step-' + selected_step_id + '" value="' + selected_step_id + '">' +
+                    '</td>' +
+                    '<td>' +
+                        andOrDropdown + '</td>'+
+                    '<td>' +
+                        '<span id="delete-required-step-' + selected_step_id + '">Delete</span>' +
+                    '</td></tr>').prependTo('#required-completed-steps');
+                }else{
+                    $('<tr class="required-step">' +
+                        '<td>' +
+                            selected_step + '<input type="hidden" id="step-' + selected_step_id + '" value="' + selected_step_id + '">' +
+                        '</td><td></td><td>' +
+                            '<span id="delete-required-step-' + selected_step_id + '">Delete</span>' +
+                        '</td></tr>').prependTo('#required-completed-steps');
+                }
+
+                $('#delete-required-step-' + selected_step_id).click(function(){
+                    $(this).closest('tr').remove();
+                });
+            });
+        },
+
+        /**
+         * Submit progress bar logic/steps
+         */
+        submitProgressBarLogic: function( submitElem ){
+            var gd_admin_nonce = $('#gd_admin_nonce').val();
+            submitElem.click(function(){
+                var stepTableRows = $('#required-completed-steps').find('tr');
+                var requiredSteps = {};
+                stepTableRows.each( function(i, row){
+                    if( i > 0 ){
+                        var $row = $(row);
+                        var stepid = $row.find('input').val();
+
+                        if( i < stepTableRows.length ){
+                            var stepLogic = $row.find('select option:selected').val();
+                        }
+                        requiredSteps[stepid] = stepLogic;
+                    }
+                });
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gd_set_progress_tracker_steps',
+                        gd_admin_nonce: gd_admin_nonce,
+                        stepText: $('#progress-tracker-step-nam').val(),
+                        requiredSteps: requiredSteps
+                    },
+                    success: function(data, textStatus, jqXHR){
+                        if( data.success ){
+                            alert('Changes successfully saved.');
+                        }else{
+                            alert('Something went wrong!');
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown){
+                        alert(errorThrown);
+                    }
+                });
             });
         },
 
@@ -283,7 +348,8 @@
             this.selectMilestone( $( '.is-milestone-checkbox' ) );
             this.initEditableMetaData( $( '.gd_metadata_editable' ) );
             this.initEditableStepTitle( $( '.gd_post_title_editable' ) );
-            this.initProgressTrackerStepAdder( '#gd_progress_tracker_new_step' );
+            this.initProgressTrackerStepAdder( $('#gd_progress_tracker_new_step') );
+            this.submitProgressBarLogic( $('#gd-progress-tracker-settings-submit') );
 
             // Make admin table sortable
             $('.gd_list_progress_pts #the-list').sortable({

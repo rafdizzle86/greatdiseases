@@ -52,7 +52,6 @@ span.step-sorting-handle:before{
     text-decoration: none !important;
     color: #bbb;
 }
-
 span.step-sorting-handle:after{
     right: 0;
     content: '\f140';
@@ -67,7 +66,6 @@ span.step-sorting-handle:after{
     text-decoration: none !important;
     color: #bbb;
 }
-
 .step-sorting-handle{
     position: relative;
     border: 1px solid silver;
@@ -78,12 +76,21 @@ span.step-sorting-handle:after{
     margin-left: 10px;
     background: #F2F2F2;
 }
-
 .wp-admin select{
     white-space: nowrap;
     max-width: 235px;
 }
-
 button.new-progress-pt-choice{
     margin-top: 2px !important;
+}
+.required-step span{
+    cursor: pointer;
+    display: none;
+    color: red;
+}
+.required-step:hover span{
+    display: inline;
+}
+#required-completed-steps{
+    border: 1px solid black;
 }
