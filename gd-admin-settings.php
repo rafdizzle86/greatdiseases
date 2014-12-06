@@ -179,8 +179,8 @@ class GD_Settings_Page
     /**
      * Render the progress tracker settings tabs
      */
-    function render_progress_bar_settings(){
-        $gd_steps = get_option( 'gd_progress_pts' );
+    function render_progress_bar_settings()
+    {
         ?>
         <h2>Progress Tracker Settings</h2>
         <p>Settings for the progress tracker that displayed on the team page.</p>
@@ -188,10 +188,12 @@ class GD_Settings_Page
         <table>
             <tr style="vertical-align: text-top;">
                 <td>Step:</td>
-                <td><input type="text" id="progress-tracker-step-name" name="progress-tracker-step-name" placeholder="Enter step name"></td>
+                <td><input type="text" id="progress-tracker-step-name" name="progress-tracker-step-name"
+                           placeholder="Enter step name"></td>
                 <td>is displayed as "completed" if the following step(s) is/are completed:</td>
                 <td>
-                    <?php echo self::render_progress_pts_dropdown( 'gd_steps_dropdown' ); ?> <button id="gd_progress_tracker_new_step" class="button">Add</button>
+                    <?php echo self::render_progress_pts_dropdown('gd_steps_dropdown'); ?>
+                    <button id="gd_progress_tracker_new_step" class="button">Add</button>
                 </td>
             </tr>
         </table>
@@ -204,9 +206,40 @@ class GD_Settings_Page
             </tr>
             </thead>
         </table>
-        <br />
+        <br/>
         <button id="gd-progress-tracker-settings-submit" class="button button-primary">Submit</button>
         <?php
+        $gd_progress_tracker_steps = get_option('gd_progress_tracker_steps');
+        if (!empty($gd_progress_tracker_steps)) {
+            ?>
+            <table class="progress-tracker-steps">
+                <thead>
+                <tr>
+                    <td class="column-step_title"><b>Step Text</b></td>
+                    <td class="column-step_title"><b>Required Steps</b></td>
+                </tr>
+                </thead>
+            <?php
+            error_log( print_r( $gd_progress_tracker_steps, true ) );
+            foreach ($gd_progress_tracker_steps as $step_id => $step_data ){
+                ?>
+                <tr>
+                    <td><?php echo $step_data['step_text'] ?></td>
+                    <td>
+                        <?php
+                            foreach( $step_data['required_steps'] as $required_step_id => $logic ){
+                                echo get_the_title( $required_step_id ) . ', ' . $logic . '<br />';
+
+                            }
+                        ?>
+                    </td>
+                </tr>
+                <?php
+            }
+            ?>
+            </table>
+            <?php
+        }
     }
 
     /**
@@ -488,22 +521,28 @@ class GD_Settings_Page
             exit;
         }
 
-        $step_text = $_POST['stepText'];
+        if( empty( $_POST['requiredSteps'] ) ){
+            header("HTTP/1.0 409 Please add at least one required step before submitting a step.");
+            exit;
+        }
 
+        $step_text = $_POST['stepText'];
         $gd_progress_tracker_steps = get_option( 'gd_progress_tracker_steps' );
 
         if( empty( $gd_progress_tracker_steps ) ){
             $gd_progress_tracker_steps = array();
         }
 
+        // reverse array since we don't want to start with step with no logic
+        $step_data = array(
+            'step_text' => $step_text,
+            'required_steps' => array_reverse( $_POST['requiredSteps'], true )
+        );
 
+        array_push( $gd_progress_tracker_steps, $step_data );
 
-        /*
-        if( count( $_POST['requiredSteps'] ) == 0 ){
-            $success = update_option( 'gd_progress_tracker_data', array() );
-        }else{
-            $success = update_option( 'gd_progress_tracker_data', $_POST['stepData'] );
-        }*/
+        $success = update_option( 'gd_progress_tracker_steps', $gd_progress_tracker_steps );
+
         echo json_encode( array( 'success' => $success) );
         exit;
     }

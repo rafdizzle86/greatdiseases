@@ -303,19 +303,31 @@
         submitProgressBarLogic: function( submitElem ){
             var gd_admin_nonce = $('#gd_admin_nonce').val();
             submitElem.click(function(){
+
+                // Reverse the rows so we start with the bottom @todo: use append instead of prepend when adding rows and this will fix the problem DUH
                 var stepTableRows = $('#required-completed-steps').find('tr');
                 var requiredSteps = {};
+
+                console.log( 'length:' + $(stepTableRows).length );
+
                 stepTableRows.each( function(i, row){
+                    console.log( i );
+                    console.log( row );
                     if( i > 0 ){
+
                         var $row = $(row);
                         var stepid = $row.find('input').val();
-
-                        if( i < stepTableRows.length ){
-                            var stepLogic = $row.find('select option:selected').val();
+                        var stepLogic = $row.find('select option:selected').val();
+                        if( stepLogic == undefined ){
+                            stepLogic = false;
                         }
+
                         requiredSteps[stepid] = stepLogic;
                     }
                 });
+
+                console.log( requiredSteps );
+
                 $.ajax({
                     url: ajaxurl,
                     type: 'POST',
@@ -323,7 +335,7 @@
                     data: {
                         action: 'gd_set_progress_tracker_steps',
                         gd_admin_nonce: gd_admin_nonce,
-                        stepText: $('#progress-tracker-step-nam').val(),
+                        stepText: $('#progress-tracker-step-name').val(),
                         requiredSteps: requiredSteps
                     },
                     success: function(data, textStatus, jqXHR){

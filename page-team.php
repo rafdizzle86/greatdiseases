@@ -118,6 +118,11 @@
                         // Get progress the teams have made
                         $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
 
+                        // Get progress bar steps
+                        $gd_progress_tracker_steps = get_option( 'gd_progress_tracker_steps' );
+
+                        print_r( $gd_progress_tracker_steps );
+
                         /*
                         // check if the team has made a Cholera or TB decision, which will filter the query
                         $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );

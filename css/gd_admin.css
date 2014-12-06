@@ -94,3 +94,8 @@ button.new-progress-pt-choice{
 #required-completed-steps{
     border: 1px solid black;
 }
+.progress-tracker-steps{
+    margin-top: 30px;
+    width: 100%;
+    border: 1px solid silver;
+}
