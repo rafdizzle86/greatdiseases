@@ -213,10 +213,16 @@ class GD_Settings_Page
                         <td>
                             <?php
                                 foreach( $step_data['required_steps'] as $required_step_id => $logic ){
+
+                                    $meta_data = get_post_meta( $required_step_id, '_gd_step_metadata', true);
+                                    if( !empty( $meta_data ) ){
+                                        $meta_data = ' (' . $meta_data . ')';
+                                    }
+
                                     if( $logic == 'false' ){
-                                        echo get_the_title( $required_step_id ) . ' <br />';
+                                        echo get_the_title( $required_step_id ) . $meta_data . ' <br />';
                                     }else{
-                                        echo get_the_title( $required_step_id ) . ', ' . $logic . '<br />';
+                                        echo get_the_title( $required_step_id ) . $meta_data . ', ' . $logic . '<br />';
                                     }
                                 }
                             ?>

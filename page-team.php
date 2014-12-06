@@ -115,88 +115,76 @@
                         <h2>Team Progress:</h2>
                         <div class="clear"></div>
                         <?php
+
                         // Get progress the teams have made
                         $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
-
                         // Get progress bar steps
                         $gd_progress_tracker_steps = get_option( 'gd_progress_tracker_steps' );
 
-                        print_r( $gd_progress_tracker_steps );
 
-                        /*
-                        // check if the team has made a Cholera or TB decision, which will filter the query
-                        $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
+                        error_log( print_r( $gd_progress_tracker_steps, true ) );
 
-                        // Run a query to get the right ordering of progress points
-                        $progress_pts = get_option( 'gd_progress_pts' );
-                        $gd_query_args = array(
-                            'post_type' => 'page',
-                            'post_status' => 'publish',
-                            'post__in' => $progress_pts,
-                            'posts_per_page' => -1,
-                            'orderby' => 'meta_value_num',
-                            'meta_key' => '_gd_step_order',
-                            'order' => 'ASC'
-                        );
-                        $gd_query = new WP_Query( $gd_query_args );
+                        //error_log( print_r( $team_progress, true ) );
 
-                        // @todo: create "start" or "pivot" steps
-                        // Check for cholera or TB decisions based on the "Pick a disease" step
-                        $disease_decision = '';
-                        if( !empty( $team_progress['decisions'] ) ){
-                            foreach( $team_progress['decisions'] as $decision_id => $decision ){
-                                if( strpos( sanitize_title( $decision->step_title ), 'pick-a-disease' ) !== false ){
-                                    $disease_decision = $decision->choice_made;
-                                    break;
+                        // Render the progress tracker
+                        if( !empty( $gd_progress_tracker_steps ) ){
+                            $step_html = '';
+
+                            foreach( $gd_progress_tracker_steps as $step_id => $step_data ){
+
+                                $completed_steps = array(); // keeps track of the completed steps representing the "completed" progress step
+                                $keys = array_keys( $step_data['required_steps'] );
+
+                                if( count( $keys ) == 1 ){
+
+                                    $result = isset( $team_progress[ $keys[0] ] );
+
+                                }else if( count( $keys ) > 1 ){
+
+                                    foreach( $keys as $k => $step_id ){
+                                        // If we've reached the last step, don't test logic
+                                        if( $k + 1 == count($keys) ){
+                                            break;
+                                        }
+
+                                        $result = isset( $team_progress[ $keys[$k] ] );
+                                        $logic = $step_data['required_steps'][ $keys[$k] ];
+
+                                        // Figure out if we've completed the required steps to consider this progress step "completed"
+                                        switch( $logic ){
+                                            case 'or':
+                                                $result = $result || isset( $team_progress[ $keys[$k + 1] ] );
+                                                break;
+                                            case 'and':
+                                                $result = $result && isset( $team_progress[ $keys[$k + 1] ] );
+                                                break;
+                                            default:
+                                                continue;
+                                        }
+                                    }
                                 }
+
+                                // If result is true (we've completed the step), then mark it as done!
+                                if( $result ){
+                                    $progress_class = 'progress-point done';
+                                }else{
+                                    $progress_class = 'progress-point todo';
+                                }
+
+                                $step_html .= '<li class="' . $progress_class . '">';
+                                    if( count( $completed_steps ) == 1 ){
+                                        $step_html .= '<a href="' . get_the_permalink( $completed_steps[0] ) . '">' . $step_data['step_text'] . '</a>';
+                                    }else{
+                                        $step_html .= '<a href="#">' . $step_data['step_text'] . '</a>';
+                                    }
+                                $step_html .= '</li>';
+
                             }
-                        }
 
-
-                        if ( $gd_query->have_posts() ) {
                             echo '<ol class="progress-meter">';
-                            while ( $gd_query->have_posts() ) {
-                                $gd_query->the_post();
-                                $progress_pt_page = get_post( get_the_ID() );
-                                $progress_class = 'progress-point todo';
-
-                                // If the team progressed thru the point, mark it as done
-                                if( isset( $team_progress[ get_the_ID() ] ) ){
-                                    $submission_post_id = $team_progress[ get_the_ID() ];
-                                    $progress_post = get_post( $submission_post_id );
-
-                                    if( $progress_post->post_status == 'publish' ){
-                                        $progress_class = 'progress-point done';
-                                    }
-                                }
-
-
-                                $step_tag = get_post_meta( get_the_ID(), '_gd_step_metadata', true);
-
-                                // determines based off "Cholera" or "TB" decision in "Pick a disease" step
-                                // whether or not to show steps tagged as "TB" or "Cholera"
-                                $show_step = true;
-                                if( !empty( $step_tag) ){
-                                    if( $step_tag !== $disease_decision ){
-                                        $show_step = false;
-                                    }
-                                }
-
-                                if( is_object( $progress_pt_page ) && $show_step ){
-                                    $step_html = '<li class="' . $progress_class . '">';
-                                        $step_html .= '<a href="' . get_permalink( $progress_pt_page->ID )  .'">' . $progress_pt_page->post_title  . '</a>';
-                                    $step_html .= '</li>';
-
-                                    // Apply some filters before we echo the step
-                                    $step_html = apply_filters( 'gd_progress_tracker_step_html_pre_render', $step_html, $progress_pt_page, $team_id );
-
-                                    echo $step_html;
-                                }
-                            }
+                            echo $step_html;
                             echo '</ol>';
                         }
-                        wp_reset_postdata();
-                        */
                         ?>
                         <div class="clear"></div>
                     </div>
