@@ -24,6 +24,7 @@ class GD_Settings_Page
         add_action( 'wp_ajax_gd_save_metadata', array( $this, 'gd_save_metadata') );
         add_action( 'wp_ajax_gd_save_post_title', array( $this, 'gd_save_post_title') );
         add_action( 'wp_ajax_gd_set_progress_tracker_steps', array( $this, 'gd_set_progress_tracker_steps') );
+        add_action( 'wp_ajax_gd_set_progress_step_order', array( $this, 'gd_set_progress_step_order') );
 
         add_action( 'admin_head', array( &$this, 'admin_header' ) );
 
@@ -39,18 +40,6 @@ class GD_Settings_Page
         $page = ( isset($_GET['page'] ) ) ? esc_attr( $_GET['page'] ) : false;
         if( 'gd-setting-admin' != $page )
             return;
-
-
-        echo '<style type="text/css">';
-        echo '.wp-list-table .column-post_title { width: 70%; }';
-        echo '.wp-list-table .column-post_step_metadata { width: 15%; }';
-        echo '.wp-list-table .column-post_is_milestone { width: 10%; }';
-        echo '.wp-list-table .column-post_order { width: 5%; }';
-
-        echo '#required-completed-steps .column-step_title  { width: 80%; }';
-        echo '#required-completed-steps .column-step_logic  { width: 10%; }';
-        echo '#required-completed-steps .column-step_delete { width: 10%; }';
-        echo '</style>';
     }
 
     /**
@@ -100,16 +89,6 @@ class GD_Settings_Page
             'gd-setting-admin', // Page
             'gd_progress_pt_section' // Section
         );
-
-        /*
-        add_settings_field(
-            'gd_is_visible', // ID
-            'Is this step visible? <small>(determines if the step is visible in the progress tracker on the team page):</small>', // Title
-            array( $this, 'gd_is_visible_callback' ), // Callback
-            'gd-setting-admin', // Page
-            'gd_progress_pt_section' // Section
-        );
-        */
 
         add_settings_field(
             'step_metadata', // ID
@@ -168,7 +147,7 @@ class GD_Settings_Page
                 </div>
             <?php
             }else if( $tab == 'gd_progress_tracker') {
-                self::render_progress_bar_settings();
+                self::render_progress_tracker_settings();
             }
             wp_nonce_field('gd_add_new_choice', 'gd_admin_nonce', false);
             ?>
@@ -179,7 +158,7 @@ class GD_Settings_Page
     /**
      * Render the progress tracker settings tabs
      */
-    function render_progress_bar_settings()
+    function render_progress_tracker_settings()
     {
         ?>
         <h2>Progress Tracker Settings</h2>
@@ -210,33 +189,47 @@ class GD_Settings_Page
         <button id="gd-progress-tracker-settings-submit" class="button button-primary">Submit</button>
         <?php
         $gd_progress_tracker_steps = get_option('gd_progress_tracker_steps');
-        if (!empty($gd_progress_tracker_steps)) {
+        if ( !empty( $gd_progress_tracker_steps ) ) {
             ?>
-            <table class="progress-tracker-steps">
+            <table class="wp-list-table widefat fixed progress-tracker-steps">
                 <thead>
                 <tr>
-                    <td class="column-step_title"><b>Step Text</b></td>
-                    <td class="column-step_title"><b>Required Steps</b></td>
+                    <th class="column-step_title"><b>Step Text</b></td>
+                    <th class="column-required_steps"><b>Required Steps</b></td>
+                    <th class="column-reorder_step"><b>Re-order</b></td>
                 </tr>
                 </thead>
-            <?php
-            error_log( print_r( $gd_progress_tracker_steps, true ) );
-            foreach ($gd_progress_tracker_steps as $step_id => $step_data ){
-                ?>
-                <tr>
-                    <td><?php echo $step_data['step_text'] ?></td>
-                    <td>
-                        <?php
-                            foreach( $step_data['required_steps'] as $required_step_id => $logic ){
-                                echo get_the_title( $required_step_id ) . ', ' . $logic . '<br />';
-
-                            }
-                        ?>
-                    </td>
-                </tr>
+                <tbody id="the-list">
                 <?php
-            }
-            ?>
+                $c = true;
+                foreach ($gd_progress_tracker_steps as $step_id => $step_data ){
+                    ?>
+                    <tr id="<?php echo $step_id ?>" <?php echo (($c = !$c)?' class="alternate"':'') ?>>
+                        <td>
+                            <span class="step-text"><?php echo $step_data['step_text'] ?></span>
+                            <br />
+                            <span class="delete-progress-step">Delete</span>
+                        </td>
+                        <td>
+                            <?php
+                                foreach( $step_data['required_steps'] as $required_step_id => $logic ){
+                                    if( $logic == 'false' ){
+                                        echo get_the_title( $required_step_id ) . ' <br />';
+                                    }else{
+                                        echo get_the_title( $required_step_id ) . ', ' . $logic . '<br />';
+                                    }
+                                }
+                            ?>
+                        </td>
+                        <td>
+                            <span class="step-sorting-handle"></span>
+                            <div style="clear: both;"></div>
+                        </td>
+                    </tr>
+                    <?php
+                }
+                ?>
+                </tbody>
             </table>
             <?php
         }
@@ -440,6 +433,41 @@ class GD_Settings_Page
     }
 
     /**
+     * Sets order of progress tracker steps
+     */
+    function gd_set_progress_step_order(){
+        $nonce = $_POST[ 'gd_admin_nonce' ];
+        if( !wp_verify_nonce( $nonce, 'gd_add_new_choice' ) ){
+            header("HTTP/1.0 409 Security Check.");
+            exit;
+        }
+
+        if( empty( $_POST['step_order'] ) ){
+            header("HTTP/1.0 409 Could not locate step order.");
+            exit;
+        }
+
+        $gd_progress_tracker_steps = get_option('gd_progress_tracker_steps');
+        $step_order = $_POST['step_order'];
+
+        if( count( $step_order ) !== count( $gd_progress_tracker_steps ) ){
+            header("HTTP/1.0 409 The number of steps do not match - try re-ordering again!");
+            exit;
+        }
+
+        // create a new array with the correct order
+        $new_progress_tracker_order = array();
+        foreach( $step_order as $order => $step_id ){
+            $new_progress_tracker_order[$step_id] = $gd_progress_tracker_steps[$step_id];
+        }
+
+        $success = update_option( 'gd_progress_tracker_steps', $new_progress_tracker_order );
+
+        echo json_encode( array( 'success' => $success ) );
+        exit;
+    }
+
+    /**
      * AJAX call to save choice settings
      */
     function gd_save_choice_settings(){
@@ -533,15 +561,21 @@ class GD_Settings_Page
             $gd_progress_tracker_steps = array();
         }
 
+        $key = $gd_progress_tracker_key = get_option( 'gd_progress_tracker_key' );
+        if( empty($key) ){
+            $key = 0;
+        }
+
         // reverse array since we don't want to start with step with no logic
         $step_data = array(
             'step_text' => $step_text,
             'required_steps' => array_reverse( $_POST['requiredSteps'], true )
         );
 
-        array_push( $gd_progress_tracker_steps, $step_data );
+        $gd_progress_tracker_steps[$key++] = $step_data; // Save the progress tracker step in the array
 
-        $success = update_option( 'gd_progress_tracker_steps', $gd_progress_tracker_steps );
+        $success = update_option( 'gd_progress_tracker_key', $key ); // update key and tracker options to the db
+        $success = $success && update_option( 'gd_progress_tracker_steps', $gd_progress_tracker_steps );
 
         echo json_encode( array( 'success' => $success) );
         exit;

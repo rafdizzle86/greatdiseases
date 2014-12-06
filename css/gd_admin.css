@@ -1,3 +1,17 @@
+/* Table css */
+.wp-list-table .column-post_title { width: 70%; }
+.wp-list-table .column-post_step_metadata { width: 15%; }
+.wp-list-table .column-post_is_milestone { width: 10%; }
+.wp-list-table .column-post_order { width: 5%; }
+
+#required-completed-steps .column-step_title  { width: 80%; }
+#required-completed-steps .column-step_logic  { width: 10%; }
+#required-completed-steps .column-step_delete { width: 10%; }
+
+.progress-tracker-steps .column-step_title  { width: 30%; }
+.progress-tracker-steps .column-required_steps { width: 50%; }
+.progress-tracker-steps .column-reorder_step { width: 10%; }
+
 .gd-progress-pt-choices{
     display: none;
     border: 1px solid #ccc;
@@ -98,4 +112,18 @@ button.new-progress-pt-choice{
     margin-top: 30px;
     width: 100%;
     border: 1px solid silver;
+}
+.progress-tracker-steps td{
+    height: 56px;
+}
+.progress-tracker-steps td:hover .delete-progress-step{
+    display: inline;
+}
+.delete-progress-step{
+    display: none;
+    color: #a00;
+    cursor: pointer;
+}
+.delete-progress-step:hover{
+    color: red;
 }

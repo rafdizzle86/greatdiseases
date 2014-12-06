@@ -304,29 +304,20 @@
             var gd_admin_nonce = $('#gd_admin_nonce').val();
             submitElem.click(function(){
 
-                // Reverse the rows so we start with the bottom @todo: use append instead of prepend when adding rows and this will fix the problem DUH
-                var stepTableRows = $('#required-completed-steps').find('tr');
-                var requiredSteps = {};
-
-                console.log( 'length:' + $(stepTableRows).length );
+                var stepTableRows = $('#required-completed-steps').find('tr'); // iterate through all the rows
+                var requiredSteps = {}; // create object to capture step text and logic
 
                 stepTableRows.each( function(i, row){
-                    console.log( i );
-                    console.log( row );
                     if( i > 0 ){
-
                         var $row = $(row);
-                        var stepid = $row.find('input').val();
-                        var stepLogic = $row.find('select option:selected').val();
+                        var stepid = $row.find('input').val(); // capture step id
+                        var stepLogic = $row.find('select option:selected').val(); // capture logic operator ('and' or 'or')
                         if( stepLogic == undefined ){
                             stepLogic = false;
                         }
-
                         requiredSteps[stepid] = stepLogic;
                     }
                 });
-
-                console.log( requiredSteps );
 
                 $.ajax({
                     url: ajaxurl,
@@ -352,22 +343,15 @@
             });
         },
 
-        init: function(){
-
-            // Handlers for 'Save Choice', 'Is Milestone' and 'Is Visible' checkboxes/buttons
-            this.saveChoiceSettings( $( '.save-choice' ) );
-            this.selectIsVisible( $( '.is-visible-checkbox') );
-            this.selectMilestone( $( '.is-milestone-checkbox' ) );
-            this.initEditableMetaData( $( '.gd_metadata_editable' ) );
-            this.initEditableStepTitle( $( '.gd_post_title_editable' ) );
-            this.initProgressTrackerStepAdder( $('#gd_progress_tracker_new_step') );
-            this.submitProgressBarLogic( $('#gd-progress-tracker-settings-submit') );
-
+        /**
+         * Makes the step table sortable
+         */
+        makeStepTableSortable: function( tableElem ){
             // Make admin table sortable
-            $('.gd_list_progress_pts #the-list').sortable({
+            tableElem.sortable({
                 handle: ".step-sorting-handle",
                 stop: function( event, ui ){
-                    var sortedIDs = $( ".gd_list_progress_pts #the-list" ).sortable( "toArray" );
+                    var sortedIDs = tableElem.sortable( "toArray" );
                     var gd_admin_nonce = $('#gd_admin_nonce').val();
                     $.ajax({
                         url: ajaxurl,
@@ -389,7 +373,54 @@
                     });
                 }
             });
+        },
 
+        /**
+         * Makes the progress tracker table sortable
+         */
+        makeProgressTrackerTableSortable: function( tableElem ){
+            // Make admin table sortable
+            tableElem.sortable({
+                handle: ".step-sorting-handle",
+                stop: function( event, ui ){
+                    var sortedIDs = tableElem.sortable( "toArray" );
+                    var gd_admin_nonce = $('#gd_admin_nonce').val();
+                    console.log( sortedIDs );
+
+                    $.ajax({
+                        url: ajaxurl,
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action : 'gd_set_progress_step_order',
+                            gd_admin_nonce : gd_admin_nonce,
+                            step_order: sortedIDs
+                        },
+                        success: function(data, textStatus, jqXHR){
+                            if( data.success ){
+                                $('#choice-' + choiceID + '-' + postID).fadeOut().remove();
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown){
+                            alert(errorThrown)
+                        }
+                    });
+                }
+            });
+        },
+
+        init: function(){
+
+            // Handlers for various buttons/elements on the admin page
+            this.saveChoiceSettings( $( '.save-choice' ) );
+            this.selectIsVisible( $( '.is-visible-checkbox') );
+            this.selectMilestone( $( '.is-milestone-checkbox' ) );
+            this.initEditableMetaData( $( '.gd_metadata_editable' ) );
+            this.initEditableStepTitle( $( '.gd_post_title_editable' ) );
+            this.initProgressTrackerStepAdder( $('#gd_progress_tracker_new_step') );
+            this.submitProgressBarLogic( $('#gd-progress-tracker-settings-submit') );
+            this.makeStepTableSortable( $('.gd_list_progress_pts #the-list') );
+            this.makeProgressTrackerTableSortable( $('.progress-tracker-steps #the-list') );
             this.bindDeleteComment( $('.edit-gd-choice-inline') );
             this.bindAddNewChoice( $( '.new-progress-pt-choice' ) );
             this.bindDeleteChoice( $('.delete-choice') );
