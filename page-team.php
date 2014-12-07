@@ -119,6 +119,8 @@
                         $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );     // Get progress the teams have made
                         $gd_progress_tracker_steps = get_option( 'gd_progress_tracker_steps' ); // Get progress bar steps
 
+                        error_log( print_r( $team_progress, true ) );
+
                         // Render the progress tracker
                         if( !empty( $gd_progress_tracker_steps ) ){
                             $step_html = '';
@@ -145,14 +147,14 @@
                                         // Figure out if we've completed the required steps to consider this progress step "completed"
                                         switch( $logic ){
                                             case 'or':
-                                                $result = $result || isset( $team_progress[ $keys[$k + 1] ] );
+                                                $result = $result || isset( $team_progress['decisions'][ $keys[$k + 1] ] );
                                                 break;
                                             case 'and':
-                                                $result = $result && isset( $team_progress[ $keys[$k + 1] ] );
+                                                $result = $result && isset( $team_progress['decisions'][ $keys[$k + 1] ] );
                                                 break;
                                         }
 
-                                        if( isset( $team_progress[ $keys[$k + 1] ] ) ){
+                                        if( isset( $team_progress['decisions'][ $keys[$k + 1] ] ) ){
                                             array_push( $completed_steps, $keys[$k + 1] );
                                         }
                                     }

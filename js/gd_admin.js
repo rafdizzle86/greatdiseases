@@ -180,7 +180,7 @@
                 var postID = $(this).data('postid');
                 var choiceID = $(this).data('choiceid');
                 var gd_admin_nonce = $('#gd_admin_nonce').val();
-                var choiceText = $('#choice-text-' + choiceID).val()
+                var choiceText = $('#choice-text-' + choiceID + '-' + postID).val()
                 var nextStep = $('#choice-goto-' + choiceID + '-' + postID).val();
 
                 $.ajax({

@@ -159,7 +159,7 @@ class GD_Progress_Pts_Table extends WP_List_Table {
     function render_progress_pt_choice( $choice, $choice_id, $progress_pt_id ){
 
 	    $choice_html = '<div id="choice-' . $choice_id .'-' . $progress_pt_id . '" class="gd-progress-pt-choice">';
-            $choice_html .= 'Choice Text: <input type="text" id="choice-text-' . $choice_id . '" value="' . $choice['choice_title'] . '"> ';
+            $choice_html .= 'Choice Text: <input type="text" id="choice-text-' . $choice_id . '-' . $progress_pt_id . '" value="' . $choice['choice_title'] . '"> ';
 
 	        $delete_choice = '<span id="delete-choice-' . $choice_id . '" class="delete-choice delete" data-choiceid="' . $choice_id . '" data-postid="' . $progress_pt_id . '">Delete</span>';
 	        $save_choice = '<span id="save-choice-' . $choice_id . '" class="save-choice save" data-choiceid="' . $choice_id . '" data-postid="' . $progress_pt_id . '">Save Changes</span>';
