@@ -116,15 +116,8 @@
                         <div class="clear"></div>
                         <?php
 
-                        // Get progress the teams have made
-                        $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
-                        // Get progress bar steps
-                        $gd_progress_tracker_steps = get_option( 'gd_progress_tracker_steps' );
-
-
-                        error_log( print_r( $gd_progress_tracker_steps, true ) );
-
-                        //error_log( print_r( $team_progress, true ) );
+                        $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );     // Get progress the teams have made
+                        $gd_progress_tracker_steps = get_option( 'gd_progress_tracker_steps' ); // Get progress bar steps
 
                         // Render the progress tracker
                         if( !empty( $gd_progress_tracker_steps ) ){
@@ -132,22 +125,21 @@
 
                             foreach( $gd_progress_tracker_steps as $step_id => $step_data ){
 
-                                $completed_steps = array(); // keeps track of the completed steps representing the "completed" progress step
-                                $keys = array_keys( $step_data['required_steps'] );
+                                $completed_steps = array(); // collect steps completed
+                                $keys   = array_keys( $step_data['required_steps'] ); // Get required step IDs
+                                $result = isset( $team_progress[ $keys[0] ] );      // Get the first result
 
-                                if( count( $keys ) == 1 ){
+                                if( $result ){
+                                    array_push( $completed_steps, $keys[0] );
+                                }
 
-                                    $result = isset( $team_progress[ $keys[0] ] );
-
-                                }else if( count( $keys ) > 1 ){
-
+                                if( count( $keys ) > 1 ){
                                     foreach( $keys as $k => $step_id ){
-                                        // If we've reached the last step, don't test logic
-                                        if( $k + 1 == count($keys) ){
+
+                                        if( $k + 1 == count($keys) ){ // If we've reached the last step, don't test logic
                                             break;
                                         }
 
-                                        $result = isset( $team_progress[ $keys[$k] ] );
                                         $logic = $step_data['required_steps'][ $keys[$k] ];
 
                                         // Figure out if we've completed the required steps to consider this progress step "completed"
@@ -158,8 +150,10 @@
                                             case 'and':
                                                 $result = $result && isset( $team_progress[ $keys[$k + 1] ] );
                                                 break;
-                                            default:
-                                                continue;
+                                        }
+
+                                        if( isset( $team_progress[ $keys[$k + 1] ] ) ){
+                                            array_push( $completed_steps, $keys[$k + 1] );
                                         }
                                     }
                                 }
@@ -178,7 +172,6 @@
                                         $step_html .= '<a href="#">' . $step_data['step_text'] . '</a>';
                                     }
                                 $step_html .= '</li>';
-
                             }
 
                             echo '<ol class="progress-meter">';
