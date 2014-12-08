@@ -234,6 +234,61 @@
         },
 
         /**
+         * Make progress step titles editable
+         * @param titleElem
+         */
+        initEditableProgressStepTitle: function( titleElem ){
+            var gd_admin_nonce = $('#gd_admin_nonce').val();
+            $( titleElem ).editable(
+                ajaxurl,
+                {
+                    cssclass: 'gd_metadata_input',
+                    placeholder: '<span style="color: lightgrey;"><small>Click to edit</small></span>',
+                    indicator: 'Saving...',
+                    onblur: 'submit',
+                    submitdata: function(value, settings) {
+                        return {
+                            action: 'gd_save_progress_step_title',
+                            gd_admin_nonce: gd_admin_nonce,
+                            stepid: $(this).data('stepid')
+                        };
+                    }
+                }
+            );
+        },
+
+        /**
+         * Delets a progress tracker step
+         * @param metaDataElem
+         */
+        deleteProgressTrackerStep: function( deleteElem ){
+            var gd_admin_nonce = $('#gd_admin_nonce').val();
+            deleteElem.click(function(){
+                var stepid = $(this).data('stepid');
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gd_delete_progress_tracker_step',
+                        gd_admin_nonce: gd_admin_nonce,
+                        stepid: stepid
+                    },
+                    success: function(data, textStatus, jqXHR){
+                        if( data.success ){
+                            $("#" + stepid).remove();
+                        }else{
+                            alert('Something went wrong!');
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown){
+                        alert(errorThrown);
+                    }
+                });
+            });
+        },
+
+        /**
          * Uses jEditable on the meta data field
          * @param metaDataElem
          */
@@ -331,7 +386,7 @@
                     },
                     success: function(data, textStatus, jqXHR){
                         if( data.success ){
-                            alert('Changes successfully saved.');
+                            location.reload();
                         }else{
                             alert('Something went wrong!');
                         }
@@ -417,6 +472,7 @@
             this.selectMilestone( $( '.is-milestone-checkbox' ) );
             this.initEditableMetaData( $( '.gd_metadata_editable' ) );
             this.initEditableStepTitle( $( '.gd_post_title_editable' ) );
+            this.initEditableProgressStepTitle( $('.step-text') );
             this.initProgressTrackerStepAdder( $('#gd_progress_tracker_new_step') );
             this.submitProgressBarLogic( $('#gd-progress-tracker-settings-submit') );
             this.makeStepTableSortable( $('.gd_list_progress_pts #the-list') );
@@ -424,6 +480,8 @@
             this.bindDeleteComment( $('.edit-gd-choice-inline') );
             this.bindAddNewChoice( $( '.new-progress-pt-choice' ) );
             this.bindDeleteChoice( $('.delete-choice') );
+            this.deleteProgressTrackerStep( $('.delete-progress-step' ) );
+
         }
     };
 

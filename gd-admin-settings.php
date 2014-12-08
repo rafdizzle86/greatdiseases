@@ -25,6 +25,8 @@ class GD_Settings_Page
         add_action( 'wp_ajax_gd_save_post_title', array( $this, 'gd_save_post_title') );
         add_action( 'wp_ajax_gd_set_progress_tracker_steps', array( $this, 'gd_set_progress_tracker_steps') );
         add_action( 'wp_ajax_gd_set_progress_step_order', array( $this, 'gd_set_progress_step_order') );
+        add_action( 'wp_ajax_gd_save_progress_step_title', array( $this, 'gd_save_progress_step_title') );
+        add_action( 'wp_ajax_gd_delete_progress_tracker_step', array( $this, 'gd_delete_progress_tracker_step') );
 
         add_action( 'admin_head', array( &$this, 'admin_header' ) );
 
@@ -206,9 +208,9 @@ class GD_Settings_Page
                     ?>
                     <tr id="<?php echo $step_id ?>" <?php echo (($c = !$c)?' class="alternate"':'') ?>>
                         <td>
-                            <span class="step-text"><?php echo $step_data['step_text'] ?></span>
+                            <span class="step-text" data-stepid="<?php echo $step_id; ?>"><?php echo $step_data['step_text'] ?></span>
                             <br />
-                            <span class="delete-progress-step">Delete</span>
+                            <span class="delete-progress-step" data-stepid="<?php echo $step_id ?>">Delete</span>
                         </td>
                         <td>
                             <?php
@@ -541,6 +543,42 @@ class GD_Settings_Page
     }
 
     /**
+     * AJAX call to save progress tracker step titles
+     */
+    function gd_save_progress_step_title(){
+        $nonce = $_POST[ 'gd_admin_nonce' ];
+        if( !wp_verify_nonce( $nonce, 'gd_add_new_choice' ) ){
+            header("HTTP/1.0 409 Security Check.");
+            exit;
+        }
+
+        if( empty( $_POST['value'] ) ){
+            header("HTTP/1.0 409 Please enter step text before continuing.");
+            exit;
+        }
+
+        if( !isset( $_POST['stepid'] ) ){
+            header("HTTP/1.0 409 Error: could not find step id!");
+            exit;
+        }
+
+        $step_id   = (int) $_POST['stepid'];
+        $new_step_text = $_POST['value'];
+        $gd_progress_tracker_steps = get_option( 'gd_progress_tracker_steps' );
+
+        $gd_progress_tracker_steps[$step_id]['step_text'] = $new_step_text;
+
+        $success = update_option( 'gd_progress_tracker_steps', $gd_progress_tracker_steps );
+
+        if( $success ){
+            echo $new_step_text;
+        }else{
+            header("HTTP/1.0 409 Error: could not save step title!");
+        }
+        exit;
+    }
+
+    /**
      * AJAX call to set the progress tracker steps
      */
     function gd_set_progress_tracker_steps(){
@@ -587,6 +625,32 @@ class GD_Settings_Page
         exit;
     }
 
+    /**
+     * AJAX call that removes a step from the progress tracker
+     */
+    function gd_delete_progress_tracker_step(){
+        $nonce = $_POST[ 'gd_admin_nonce' ];
+        if( !wp_verify_nonce( $nonce, 'gd_add_new_choice' ) ){
+            header("HTTP/1.0 409 Security Check.");
+            exit;
+        }
+
+        if( !isset( $_POST['stepid'] ) ){
+            header("HTTP/1.0 409 Error: could find step id to remove!");
+            exit;
+        }
+
+        $step_id = (int) $_POST['stepid'];
+
+        $gd_progress_tracker_steps = get_option( 'gd_progress_tracker_steps' );
+
+        unset( $gd_progress_tracker_steps[$step_id] );
+
+        $success = update_option( 'gd_progress_tracker_steps', $gd_progress_tracker_steps );
+
+        echo json_encode( array( 'success' => $success ) );
+        exit;
+    }
 
 	/**
 	 * AJAX call that sets the Milestone boolean option
