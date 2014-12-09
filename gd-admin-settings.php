@@ -254,20 +254,34 @@ class GD_Settings_Page
      */
     public static function render_progress_pts_dropdown( $drop_down_id, $before_txt = '', $select_id = '', $after_txt = '' ){
 
+        global $wpdb;
+
         $gd_progress_pts = get_option( 'gd_progress_pts' );
+        $gd_query_args = array(
+            'post_type' => 'page',
+            'post_status' => 'publish',
+            'post__in' => $gd_progress_pts,
+            'order' => 'ASC',
+            'posts_per_page' => -1,
+            'orderby' => 'meta_value_num',
+            'meta_key' => '_gd_step_order'
+        );
+
+        $gd_query = new WP_Query( $gd_query_args );
+
+        $gd_decision_pts_ordered = $wpdb->get_results( $gd_query->request );
 
         $drop_down_html = '';
 
-        if( !empty( $gd_progress_pts ) && is_array( $gd_progress_pts ) ){
+        if( !empty( $gd_decision_pts_ordered ) && is_array( $gd_decision_pts_ordered ) ){
             $drop_down_html = $before_txt;
             $drop_down_html .= '<select id="' . $drop_down_id . '">';
 
-            foreach( $gd_progress_pts as $progress_pt_id ){
-                $progress_pt_post = get_post( $progress_pt_id );
-                $meta_data = get_post_meta( $progress_pt_id, '_gd_step_metadata', true );
+            foreach( $gd_decision_pts_ordered as $progress_pt ){
+                $meta_data = get_post_meta( $progress_pt->ID, '_gd_step_metadata', true );
                 $meta_data = !empty( $meta_data ) ? '(' . $meta_data . ')' : '';
-                $selected = $progress_pt_id == $select_id ? 'selected' : '';
-                $drop_down_html .= '<option id="progress-pt-' . $progress_pt_id .'" value="' . $progress_pt_id . '" ' . $selected . '>' . $progress_pt_post->post_title . ' ' . $meta_data . '</option>';
+                $selected = $progress_pt->ID == $select_id ? 'selected' : '';
+                $drop_down_html .= '<option id="progress-pt-' . $progress_pt->ID .'" value="' . $progress_pt->ID . '" ' . $selected . '>' . $progress_pt->post_title . ' ' . $meta_data . '</option>';
             }
 
             $drop_down_html .= '</select>';

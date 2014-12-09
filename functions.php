@@ -147,13 +147,17 @@ function gd_check_deleted_posts( $post_id ){
         $team_progress_option_id =  'gd-team-' . $team_id . '-progress';
         $team_progress = get_option( $team_progress_option_id );
 
-        if( isset( $team_progress[ $progress_pt_id] ) ){
-
+        if( isset( $team_progress[$progress_pt_id] ) ){
             // remove the submission post id for the progress point
             unset( $team_progress[ $progress_pt_id ] );
-            update_option( $team_progress_option_id, $team_progress );
-
         }
+
+        if( isset( $team_progress['decisions'][$progress_pt_id]) ){
+            // remove the submission post id for the progress point
+            unset( $team_progress['decisions'][$progress_pt_id] );
+        }
+
+        update_option( $team_progress_option_id, $team_progress );
     }
 }
 add_action( 'sp_qp_widget_before_after_post', 'gd_check_deleted_posts', 10, 1);

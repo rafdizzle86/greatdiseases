@@ -116,15 +116,33 @@
                         <div class="clear"></div>
                         <?php
 
+                        global $wpdb;
+
+                        $gd_progress_pts = get_option( 'gd_progress_pts' );
+                        $gd_query_args = array(
+                            'post_type' => 'page',
+                            'post_status' => 'publish',
+                            'post__in' => $gd_progress_pts,
+                            'order' => 'ASC',
+                            'posts_per_page' => 1,
+                            'orderby' => 'meta_value_num',
+                            'meta_key' => '_gd_step_order'
+                        );
+
+                        $gd_query = new WP_Query( $gd_query_args );
+                        $gd_starting_pt = $wpdb->get_results( $gd_query->request );
+                        wp_reset_query();
+
                         $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );     // Get progress the teams have made
                         $gd_progress_tracker_steps = get_option( 'gd_progress_tracker_steps' ); // Get progress bar steps
 
-                        error_log( print_r( $team_progress, true ) );
+                        //error_log( print_r( $team_progress, true ) );
 
                         // Render the progress tracker
                         if( !empty( $gd_progress_tracker_steps ) ){
                             $step_html = '';
 
+                            $counter = 0;
                             foreach( $gd_progress_tracker_steps as $step_id => $step_data ){
 
                                 $completed_steps = array(); // collect steps completed
@@ -167,6 +185,11 @@
                                     $progress_class = 'progress-point todo';
                                 }
 
+                                // If it's the first step, bind it to the first step in the decision tree
+                                if( $counter == 0 ){
+                                    array_push( $completed_steps, $gd_starting_pt[0]->ID );
+                                }
+
                                 $step_html .= '<li class="' . $progress_class . '">';
                                     if( count( $completed_steps ) == 1 ){
                                         $step_html .= '<a href="' . get_the_permalink( $completed_steps[0] ) . '">' . $step_data['step_text'] . '</a>';
@@ -174,6 +197,7 @@
                                         $step_html .= '<a href="#">' . $step_data['step_text'] . '</a>';
                                     }
                                 $step_html .= '</li>';
+                                $counter++;
                             }
 
                             echo '<ol class="progress-meter">';
