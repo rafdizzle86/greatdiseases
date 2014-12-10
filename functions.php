@@ -47,6 +47,7 @@ function gd_record_decision(){
         $decision->user_id = get_current_user_id();
         $decision->step_id = $progress_pt_id;
         $decision->choice_made = $choices[ $choice_id ]['choice_title'];
+        $decision->choice_made_id = $choice_id;
         $decision->step_title = get_the_title( $progress_pt_id );
 
         $team_progress['decisions'][$progress_pt_id] = $decision;

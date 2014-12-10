@@ -136,8 +136,6 @@
                         $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );     // Get progress the teams have made
                         $gd_progress_tracker_steps = get_option( 'gd_progress_tracker_steps' ); // Get progress bar steps
 
-                        //error_log( print_r( $team_progress, true ) );
-
                         // Render the progress tracker
                         if( !empty( $gd_progress_tracker_steps ) ){
                             $step_html = '';
@@ -147,7 +145,7 @@
 
                                 $completed_steps = array(); // collect steps completed
                                 $keys   = array_keys( $step_data['required_steps'] ); // Get required step IDs
-                                $result = isset( $team_progress[ $keys[0] ] );      // Get the first result
+                                $result = isset( $team_progress['decisions'][ $keys[0] ] );      // Get the first result
 
                                 if( $result ){
                                     array_push( $completed_steps, $keys[0] );
@@ -187,11 +185,13 @@
 
                                 // If it's the first step, bind it to the first step in the decision tree
                                 if( $counter == 0 ){
-                                    array_push( $completed_steps, $gd_starting_pt[0]->ID );
+                                    $completed_steps = array( $gd_starting_pt[0]->ID );
                                 }
 
                                 $step_html .= '<li class="' . $progress_class . '">';
-                                    if( count( $completed_steps ) == 1 ){
+                                    if( count( $completed_steps ) > 1 ){
+                                        $step_html .= '<a href="' . get_the_permalink( $completed_steps[ count($completed_steps) - 1] ) . '">' . $step_data['step_text'] . '</a>';
+                                    }else if( count( $completed_steps ) == 1) {
                                         $step_html .= '<a href="' . get_the_permalink( $completed_steps[0] ) . '">' . $step_data['step_text'] . '</a>';
                                     }else{
                                         $step_html .= '<a href="#">' . $step_data['step_text'] . '</a>';

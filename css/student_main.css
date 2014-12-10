@@ -113,6 +113,22 @@ ul#udm ul {
     height: 100%;
     padding-top: 126px;
 }
+.content p{
+    margin: 10px;
+}
+.gd-image-alignnone{
+    margin: 10px;
+    box-shadow: 10px 10px 5px #888888;
+    border: 1px solid black;
+}
+.gd-image-alignleft{
+    float: left;
+    margin-right: 25px !important;
+    margin-top: 10px !important;
+    box-shadow: 10px 10px 5px #888888;
+    border: 1px solid black;
+}
+
 .content {
 	font-size: 15px;
 	line-height: 1.5em;
