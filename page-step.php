@@ -33,43 +33,10 @@
 
         <div id="breadcrumbdivider">&nbsp;</div>
 
-        <h1><?php single_cat_title() ?></h1>
-        <p><?php echo category_description() ?></p>
-
         <div id="post-content">
             <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
-                <?php if( is_page() ) { ?>
-                    <h3><?php the_title(); ?></h3>
-                <?php } else { ?>
-                    <h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-                        <br />
-                        <small style="font-weight:normal;">Posted on <?php the_date(); ?> by <?php the_author_posts_link(); ?> | Categories: <?php the_category(', ')   ;   ?>
-                            <?php the_tags( '&nbsp;' . __( '| Tagged:&nbsp;' ) . ' ', ', ', ''); ?>
-                            |
-                            <?php if( class_exists('smartpost') ) : ?>
-                                <?php
-                                // Check if the permalink structure is with slashes, or the default structure with /?p=123
-                                $permalink_url = get_permalink( $post->ID );
-                                if( $_GET['edit_mode'] ){
-                                    $link_txt = "View mode";
-                                }else{
-                                    $link_txt = "Edit";
-                                    if( strpos( $permalink_url, '?')  ){
-                                        $permalink_url .= '&edit_mode=true';
-                                    }else{
-                                        $permalink_url .= '?edit_mode=true';
-                                    }
-                                }
-                                ?>
-                                <span class="editlink"><a href="<?php echo $permalink_url ?>"><?php echo $link_txt ?></a></span>
-                            <?php else: ?>
-                                <?php edit_post_link(__('Edit'),'<span class="editlink">','</span>'); ?>
-                            <?php endif; ?>
-                        </small>
-                    </h3>
-                <?php } ?>
-
-                <div class="content">
+                <h1><?php the_title(); ?></h1>
+                <div class="content-page-step">
                     <div id="post-thumb-<?php the_ID() ?>" class="post-thumb"><?php the_post_thumbnail( array(100, 100) ); ?></php></div>
                     <?php
 
@@ -96,7 +63,6 @@
                     $show_choices = true;
                     if( $team_id > 0 ){
                         // Show choices only if there is a submitted post and the current step is a milestone step
-                        // @todo: This binds "Milestone" steps with required submissions
                         $is_milestone = get_post_meta( get_the_ID(), '_gd_is_milestone', true );
                         $is_milestone = ($is_milestone == 'true') ? true : false;
                         $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
@@ -139,14 +105,14 @@
                             echo '<h2>Continue to the next step:</h2>';
 
                             // Filters steps before they are shown
-                            $gd_steps = apply_filters( 'gd_choice_html', $step_choices );
+                            $step_choices = apply_filters( 'gd_step_choices', $step_choices, get_the_ID() );
 
                             foreach( $step_choices as $choice_id => $choice ){
                                 $goto_permalink = get_permalink( $choice['choice_goto_id'] );
                                 $step_html = '<a href="' . $goto_permalink . '"><span class="gd-choice" data-choiceid="' . $choice_id .'" data-stepid="' . get_the_ID() . '">' . $choice['choice_title'] . '<span></a>';
 
                                 // Filters the step before it is echoed
-                                $step_html = apply_filters( 'gd_choice_pre_echo', $step_html );
+                                $step_html = apply_filters( 'gd_choice_pre_echo', $step_html, get_the_ID() );
 
                                 echo $step_html;
                             }
@@ -157,13 +123,11 @@
                     ?>
                     <div class="clear"></div>
                 </div>
-                <?php
-                if( comments_open() ){
-                    comments_template();
-                }
-                ?>
-                <div class="clear"></div>
                 <div id="post-meta">
+                    <div class="team-progress" style="border-bottom: none; border-left: none; border-right: none;">
+                        <h2>Team Progress:</h2>
+                        <?php gd_render_progress_tracker() ?>
+                    </div>
                     <p><?php edit_post_link(); ?></p>
                     <div id="breadcrumbdivider">&nbsp;</div>
                 </div>

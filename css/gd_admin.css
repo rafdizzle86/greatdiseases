@@ -1,7 +1,8 @@
 /* Table css */
-.wp-list-table .column-post_title { width: 70%; }
-.wp-list-table .column-post_step_metadata { width: 15%; }
+.wp-list-table .column-post_title { width: 65%; }
+.wp-list-table .column-post_step_metadata { width: 10%; }
 .wp-list-table .column-post_is_milestone { width: 10%; }
+.wp-list-table .column-post_is_locked { width: 10%; }
 .wp-list-table .column-post_order { width: 5%; }
 
 #required-completed-steps .column-step_title  { width: 80%; }

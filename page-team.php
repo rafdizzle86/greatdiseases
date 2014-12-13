@@ -111,100 +111,18 @@
                     </div>
 
                     <!-- team progress -->
-                    <div id="team-<?php echo $team_id ?>-progress" class="team-progress">
-                        <h2>Team Progress:</h2>
-                        <div class="clear"></div>
-                        <?php
-
-                        global $wpdb;
-
-                        $gd_progress_pts = get_option( 'gd_progress_pts' );
-                        $gd_query_args = array(
-                            'post_type' => 'page',
-                            'post_status' => 'publish',
-                            'post__in' => $gd_progress_pts,
-                            'order' => 'ASC',
-                            'posts_per_page' => 1,
-                            'orderby' => 'meta_value_num',
-                            'meta_key' => '_gd_step_order'
-                        );
-
-                        $gd_query = new WP_Query( $gd_query_args );
-                        $gd_starting_pt = $wpdb->get_results( $gd_query->request );
-                        wp_reset_query();
-
-                        $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );     // Get progress the teams have made
-                        $gd_progress_tracker_steps = get_option( 'gd_progress_tracker_steps' ); // Get progress bar steps
-
-                        // Render the progress tracker
-                        if( !empty( $gd_progress_tracker_steps ) ){
-                            $step_html = '';
-
-                            $counter = 0;
-                            foreach( $gd_progress_tracker_steps as $step_id => $step_data ){
-
-                                $completed_steps = array(); // collect steps completed
-                                $keys   = array_keys( $step_data['required_steps'] ); // Get required step IDs
-                                $result = isset( $team_progress['decisions'][ $keys[0] ] );      // Get the first result
-
-                                if( $result ){
-                                    array_push( $completed_steps, $keys[0] );
-                                }
-
-                                if( count( $keys ) > 1 ){
-                                    foreach( $keys as $k => $step_id ){
-
-                                        if( $k + 1 == count($keys) ){ // If we've reached the last step, don't test logic
-                                            break;
-                                        }
-
-                                        $logic = $step_data['required_steps'][ $keys[$k] ];
-
-                                        // Figure out if we've completed the required steps to consider this progress step "completed"
-                                        switch( $logic ){
-                                            case 'or':
-                                                $result = $result || isset( $team_progress['decisions'][ $keys[$k + 1] ] );
-                                                break;
-                                            case 'and':
-                                                $result = $result && isset( $team_progress['decisions'][ $keys[$k + 1] ] );
-                                                break;
-                                        }
-
-                                        if( isset( $team_progress['decisions'][ $keys[$k + 1] ] ) ){
-                                            array_push( $completed_steps, $keys[$k + 1] );
-                                        }
-                                    }
-                                }
-
-                                // If result is true (we've completed the step), then mark it as done!
-                                if( $result ){
-                                    $progress_class = 'progress-point done';
-                                }else{
-                                    $progress_class = 'progress-point todo';
-                                }
-
-                                // If it's the first step, bind it to the first step in the decision tree
-                                if( $counter == 0 ){
-                                    $completed_steps = array( $gd_starting_pt[0]->ID );
-                                }
-
-                                $step_html .= '<li class="' . $progress_class . '">';
-                                    if( count( $completed_steps ) > 1 ){
-                                        $step_html .= '<a href="' . get_the_permalink( $completed_steps[ count($completed_steps) - 1] ) . '">' . $step_data['step_text'] . '</a>';
-                                    }else if( count( $completed_steps ) == 1) {
-                                        $step_html .= '<a href="' . get_the_permalink( $completed_steps[0] ) . '">' . $step_data['step_text'] . '</a>';
-                                    }else{
-                                        $step_html .= '<a href="#">' . $step_data['step_text'] . '</a>';
-                                    }
-                                $step_html .= '</li>';
-                                $counter++;
-                            }
-
-                            echo '<ol class="progress-meter">';
-                            echo $step_html;
-                            echo '</ol>';
+                    <?php
+                        if( current_user_can( 'manage_options') ){
+                            $clear_progress = '<button class="button" id="clear-team-progress" data-teamid="' . $team_id . '">Clear Team Progress</button>';
+                            $clear_progress .= wp_nonce_field('gd_clear_team_progress', 'gd_clear_team_progress_nonce' );
+                        }else{
+                            $clear_progress = '';
                         }
-                        ?>
+                    ?>
+                    <div id="team-<?php echo $team_id ?>-progress" class="team-progress">
+                        <h2>Team Progress: <?php echo $clear_progress ?></h2>
+                        <div class="clear"></div>
+                        <?php gd_render_progress_tracker() ?>
                         <div class="clear"></div>
                     </div>
 
@@ -281,7 +199,10 @@
                             }
                             echo '</ul>';
                         } else {
-                            // no posts found
+                            ?>
+                            <br />
+                            <p>To begin, click on the first step in the progress tracker above!</p>
+                            <?php
                         }
 
                         /* Restore original Post Data */

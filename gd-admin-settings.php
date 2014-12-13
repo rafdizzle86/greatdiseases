@@ -27,6 +27,7 @@ class GD_Settings_Page
         add_action( 'wp_ajax_gd_set_progress_step_order', array( $this, 'gd_set_progress_step_order') );
         add_action( 'wp_ajax_gd_save_progress_step_title', array( $this, 'gd_save_progress_step_title') );
         add_action( 'wp_ajax_gd_delete_progress_tracker_step', array( $this, 'gd_delete_progress_tracker_step') );
+        add_action( 'wp_ajax_gd_set_is_step_locked', array( $this, 'gd_set_is_step_locked') );
 
         add_action( 'admin_head', array( &$this, 'admin_header' ) );
 
@@ -662,6 +663,34 @@ class GD_Settings_Page
 
         $success = update_option( 'gd_progress_tracker_steps', $gd_progress_tracker_steps );
 
+        echo json_encode( array( 'success' => $success ) );
+        exit;
+    }
+
+    /**
+     * AJAX call that sets the 'locked' boolean option - whether a decision to a post should be 'locked'
+     */
+    function gd_set_is_step_locked(){
+        $nonce = $_POST[ 'gd_admin_nonce' ];
+        if( !wp_verify_nonce( $nonce, 'gd_add_new_choice' ) ){
+            header("HTTP/1.0 409 Security Check.");
+            exit;
+        }
+
+        if( empty( $_POST['postID'] ) ){
+            header("HTTP/1.0 409 Could not locate post ID.");
+            exit;
+        }
+
+        if( empty( $_POST['is_locked'] ) ){
+            header("HTTP/1.0 409 Please fill in a choice title.");
+            exit;
+        }
+
+        $post_id = (int) $_POST['postID'];
+        $is_milestone = $_POST['is_locked'];
+
+        $success = update_post_meta( $post_id, '_gd_is_step_locked', $is_milestone );
         echo json_encode( array( 'success' => $success ) );
         exit;
     }

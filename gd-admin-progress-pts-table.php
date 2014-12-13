@@ -30,6 +30,11 @@ class GD_Progress_Pts_Table extends WP_List_Table {
                 $post_step_metadata = '<span class="gd_metadata_editable" id="metadata-' . $item->ID . '" data-stepid="' . $item->ID . '">' . $post_step_metadata  . '</span>';
                 return $post_step_metadata;
 
+            case 'post_is_locked':
+                $is_locked = get_post_meta( $item->ID, '_gd_is_step_locked', true );
+                $is_locked = $is_locked == 'true' ? 'checked' : '';
+                return '<input type="checkbox" class="is-locked-checkbox" id="is-locked-' . $item->ID . '" data-postid="' . $item->ID .'" name="is-locked-' . $item->ID . '" ' . $is_locked . ' />';
+
             case 'post_title':
                 return $item->$column_name;
 
@@ -233,6 +238,7 @@ class GD_Progress_Pts_Table extends WP_List_Table {
             'cb' => '<input type="checkbox" />', //Render a checkbox instead of text
             'post_title' => __('Step Title'),
             'post_step_metadata' => __('Meta Data'),
+            'post_is_locked' => __('Is Locked'),
             'post_is_milestone' => __('Is Milestone'),
             'post_order' => __('Order')
         );

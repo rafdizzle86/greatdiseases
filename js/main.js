@@ -83,10 +83,39 @@
                 });
             }
         },
+        /**
+         * Clears a team's progress
+         * @param clearElem
+         */
+        clearTeamProgress: function( clearElem ){
+            clearElem.click(function(){
+                var gd_nonce = $('#gd_clear_team_progress_nonce').val();
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action : 'gd_clear_team_progress',
+                        gd_nonce : gd_nonce
+                    },
+                    success: function(data, textStatus, jqXHR){
+                        if(data.success){
+                            alert("Changes saved.");
+                            location.reload();
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown){
+                        alert(errorThrown)
+                    }
+                });
+            });
+        },
+
         init: function(){
 
             this.bindDeleteComment( $('.delete-comment') );
             this.bindChoiceClick( $( '.gd-choice' ) );
+            this.clearTeamProgress( $('#clear-team-progress') );
 
             // hide the quickpost widget if we're displaying a submitted post
             if( $('.gd-submission').length > 0 ){

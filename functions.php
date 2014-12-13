@@ -6,6 +6,38 @@ include_once( 'gd-admin-settings.php' );
 include_once( 'gd-admin-progress-pts-table.php' );
 
 /**
+ * Checks if the current step is a "locked" step. If it is, it will check if
+ * the current team has a submission for the step and display only the choice that the
+ * team has made.
+ */
+function gd_check_for_locked_step( $choices, $step_id ){
+    $curr_team_id = gd_get_current_users_team_id();
+    $curr_team_progress = get_option('gd-team-' . $curr_team_id . '-progress' );
+
+    $is_locked = get_post_meta($step_id, '_gd_is_step_locked', true );
+    $is_locked = $is_locked == 'true' ? true : false;
+
+    // If the step is locked and the team has made a decision for this step, the filter the choices
+    if( $is_locked && isset( $curr_team_progress['decisions'][$step_id] ) ){
+        foreach( $choices as $choice_key => $choice ){
+            $choice_goto_id = $choice['choice_goto_id'];
+            if( $choice_goto_id == $curr_team_progress['decisions'][$step_id]->choice_goto_id ){
+                error_log('made it');
+                // override choices with the choice made
+                $choices_new = array( array('choice_title' => $choice['choice_title'], 'choice_goto_id' => $choice['choice_goto_id']) );
+                break;
+            }
+        }
+    }else{
+        $choices_new = $choices;
+    }
+
+    return $choices_new;
+}
+
+add_filter('gd_step_choices', 'gd_check_for_locked_step', 10, 2);
+
+/**
  * Records the decision of each step
  */
 
@@ -47,7 +79,7 @@ function gd_record_decision(){
         $decision->user_id = get_current_user_id();
         $decision->step_id = $progress_pt_id;
         $decision->choice_made = $choices[ $choice_id ]['choice_title'];
-        $decision->choice_made_id = $choice_id;
+        $decision->choice_goto_id = $choices[ $choice_id ]['choice_goto_id'];
         $decision->step_title = get_the_title( $progress_pt_id );
 
         $team_progress['decisions'][$progress_pt_id] = $decision;
@@ -58,6 +90,31 @@ function gd_record_decision(){
     exit;
 }
 add_action( 'wp_ajax_gd_record_decision', 'gd_record_decision' );
+
+/**
+ * Clears a team's progress - the gd-team-<#>-progress option
+ */
+function gd_clear_team_progress(){
+    $team_id = gd_get_current_users_team_id();
+    if( $team_id > 0 ){
+        get_option( 'gd-team-' . $team_id . '-progress' );
+    }
+
+    $nonce = $_POST[ 'gd_nonce' ];
+    if( !wp_verify_nonce( $nonce, 'gd_clear_team_progress' ) ){
+        header("HTTP/1.0 409 Security Check.");
+        exit;
+    }
+    $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
+    if( !empty( $team_progress['decisions'] ) ){
+
+    }
+
+    $success = update_option( 'gd-team-' . $team_id . '-progress', array() );
+    echo json_encode( array( 'success' => $success ) );
+    exit;
+}
+add_action( 'wp_ajax_gd_clear_team_progress', 'gd_clear_team_progress' );
 
 /**
  * Gets the current user's team id
@@ -120,6 +177,102 @@ function gd_check_progress_point( $sp_post_id ){
     }
 }
 add_action( 'sp_qp_widget_ajax_new_draft', 'gd_check_progress_point', 10, 1 );
+
+/**
+ * Renders the progress tracker of the current users's team
+ */
+function gd_render_progress_tracker(){
+    $team_id = gd_get_current_users_team_id();
+    if( $team_id > 0 ){
+        global $wpdb;
+        $gd_progress_pts = get_option( 'gd_progress_pts' );
+        $gd_query_args = array(
+            'post_type' => 'page',
+            'post_status' => 'publish',
+            'post__in' => $gd_progress_pts,
+            'order' => 'ASC',
+            'posts_per_page' => 1,
+            'orderby' => 'meta_value_num',
+            'meta_key' => '_gd_step_order'
+        );
+
+        $gd_query = new WP_Query( $gd_query_args );
+        $gd_starting_pt = $wpdb->get_results( $gd_query->request );
+        wp_reset_query();
+
+        $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );     // Get progress the teams have made
+        $gd_progress_tracker_steps = get_option( 'gd_progress_tracker_steps' ); // Get progress bar steps
+
+        // Render the progress tracker
+        if( !empty( $gd_progress_tracker_steps ) ){
+            $step_html = '';
+
+            $counter = 0;
+            foreach( $gd_progress_tracker_steps as $step_id => $step_data ){
+
+                $completed_steps = array(); // collect steps completed
+                $keys   = array_keys( $step_data['required_steps'] ); // Get required step IDs
+                $result = isset( $team_progress['decisions'][ $keys[0] ] );      // Get the first result
+
+                if( $result ){
+                    array_push( $completed_steps, $keys[0] );
+                }
+
+                if( count( $keys ) > 1 ){
+                    foreach( $keys as $k => $step_id ){
+
+                        if( $k + 1 == count($keys) ){ // If we've reached the last step, don't test logic
+                            break;
+                        }
+
+                        $logic = $step_data['required_steps'][ $keys[$k] ];
+
+                        // Figure out if we've completed the required steps to consider this progress step "completed"
+                        switch( $logic ){
+                            case 'or':
+                                $result = $result || isset( $team_progress['decisions'][ $keys[$k + 1] ] );
+                                break;
+                            case 'and':
+                                $result = $result && isset( $team_progress['decisions'][ $keys[$k + 1] ] );
+                                break;
+                        }
+
+                        if( isset( $team_progress['decisions'][ $keys[$k + 1] ] ) ){
+                            array_push( $completed_steps, $keys[$k + 1] );
+                        }
+                    }
+                }
+
+                // If result is true (we've completed the step), then mark it as done!
+                if( $result ){
+                    $progress_class = 'progress-point done';
+                }else{
+                    $progress_class = 'progress-point todo';
+                }
+
+                // If it's the first step, bind it to the first step in the decision tree
+                if( $counter == 0 ){
+                    $completed_steps = array( $gd_starting_pt[0]->ID );
+                }
+
+                $step_html .= '<li class="' . $progress_class . '">';
+                if( count( $completed_steps ) > 1 ){
+                    $step_html .= '<a href="' . get_the_permalink( $completed_steps[ count($completed_steps) - 1] ) . '">' . $step_data['step_text'] . '</a>';
+                }else if( count( $completed_steps ) == 1) {
+                    $step_html .= '<a href="' . get_the_permalink( $completed_steps[0] ) . '">' . $step_data['step_text'] . '</a>';
+                }else{
+                    $step_html .= '<a href="#">' . $step_data['step_text'] . '</a>';
+                }
+                $step_html .= '</li>';
+                $counter++;
+            }
+
+            echo '<ol class="progress-meter">';
+            echo $step_html;
+            echo '</ol>';
+        }
+    }
+}
 
 /**
  * Cleans the team progress option of cancelled posts

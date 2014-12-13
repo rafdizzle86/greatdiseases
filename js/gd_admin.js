@@ -144,32 +144,32 @@
          * @param mileStoneElem
          */
         selectMilestone: function( mileStoneElem ){
-                mileStoneElem.click(function(){
-                    var is_milestone = Boolean( $(this).attr('checked') );
-                    var gd_admin_nonce = $('#gd_admin_nonce').val();
-                    var postID = $(this).data('postid');
-                    $.ajax({
-                        url: ajaxurl,
-                        type: 'POST',
-                        dataType: 'json',
-                        data: {
-                            action: 'gd_set_milestone',
-                            gd_admin_nonce: gd_admin_nonce,
-                            postID: postID,
-                            is_milestone: is_milestone
-                        },
-                        success: function(data, textStatus, jqXHR){
-                            if( data.success ){
-                                console.log(data);
-                            }else{
-                                alert('Something went wrong!');
-                            }
-                        },
-                        error: function(jqXHR, textStatus, errorThrown){
-                            alert(errorThrown);
+            mileStoneElem.click(function(){
+                var is_milestone = Boolean( $(this).attr('checked') );
+                var gd_admin_nonce = $('#gd_admin_nonce').val();
+                var postID = $(this).data('postid');
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gd_set_milestone',
+                        gd_admin_nonce: gd_admin_nonce,
+                        postID: postID,
+                        is_milestone: is_milestone
+                    },
+                    success: function(data, textStatus, jqXHR){
+                        if( data.success ){
+                            console.log(data);
+                        }else{
+                            alert('Something went wrong!');
                         }
-                    });
+                    },
+                    error: function(jqXHR, textStatus, errorThrown){
+                        alert(errorThrown);
+                    }
                 });
+            });
         },
 
         /**
@@ -463,7 +463,38 @@
                 }
             });
         },
-
+        /**
+         * Sets is locked for decision tree steps - i.e. whether an answer should locked or not
+         * @param isLockedCheckbox
+         */
+        setIsLocked: function( isLockedCheckbox ){
+            isLockedCheckbox.click(function(){
+                var is_locked = Boolean( $(this).attr('checked') );
+                var gd_admin_nonce = $('#gd_admin_nonce').val();
+                var postID = $(this).data('postid');
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gd_set_is_step_locked',
+                        gd_admin_nonce: gd_admin_nonce,
+                        postID: postID,
+                        is_locked: is_locked
+                    },
+                    success: function(data, textStatus, jqXHR){
+                        if( data.success ){
+                            console.log(data);
+                        }else{
+                            alert('Something went wrong!');
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown){
+                        alert(errorThrown);
+                    }
+                });
+            });
+        },
         init: function(){
 
             // Handlers for various buttons/elements on the admin page
@@ -481,7 +512,7 @@
             this.bindAddNewChoice( $( '.new-progress-pt-choice' ) );
             this.bindDeleteChoice( $('.delete-choice') );
             this.deleteProgressTrackerStep( $('.delete-progress-step' ) );
-
+            this.setIsLocked( $('.is-locked-checkbox') );
         }
     };
 
