@@ -83,7 +83,8 @@
                                     $wp_query->is_single = true;
                                     echo '<div id="gd-submission-' . $wp_progress_post->ID . '" class="gd-submission">';
                                     echo '<h1>Team submission:</h1>';
-                                    echo '<h2>' . $wp_progress_post->post_title . '</h2>';
+                                    echo '<h2><span id="post-' . $wp_progress_post->ID . '" class="team-submission-title" data-postid="' . $wp_progress_post->ID . '">' . $wp_progress_post->post_title . '</span></h2>';
+                                    echo wp_nonce_field( 'gd_edit_submission_title', 'gd_edit_submission_title_nonce', false, false );
                                     foreach( $sp_post_comps as $post_comp ){
                                         echo $post_comp->render( true );
                                     }

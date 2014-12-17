@@ -111,11 +111,64 @@
             });
         },
 
+        /**
+         * Make step titles editable using jEditable
+         * @param titleElem
+         */
+        initEditableTitle: function( titleElem ){
+            $( titleElem ).editable(
+                ajaxurl,
+                {
+                    cssclass: 'gd_editable_title',
+                    placeholder: '<span style="color: lightgrey;"><small>Click to edit</small></span>',
+                    indicator: 'Saving...',
+                    onblur: 'submit',
+                    submitdata: function(value, settings) {
+                        return {
+                            action: 'gd_save_submission_post_title',
+                            gd_nonce: $('#gd_edit_submission_title_nonce').val(),
+                            postid: $(this).data('postid')
+                        };
+                    }
+                }
+            );
+        },
+
+        /**
+         * Triggers the upload button and for submission
+         */
+        triggerUploadPicButton: function( triggerElem, uploadButtonElem, formElem ){
+            triggerElem.click( function(){
+               uploadButtonElem.click();
+            });
+            uploadButtonElem.change( function(){
+                formElem.submit();
+            });
+        },
+
+        /**
+         * Deletes profile pic
+         * @param deleteElem
+         * @param formElem
+         */
+        triggerDeletePicButton: function( deleteElem, formElem ){
+            deleteElem.click(function(){
+                var delete_input = '<input type="hidden" id="delete_avatar" name="delete_avatar" value="true" />';
+                formElem.append( delete_input );
+                formElem.submit();
+            });
+        },
+
         init: function(){
+
+            var gd_avatar_upload_form = $('#gd-avatar-upload');
 
             this.bindDeleteComment( $('.delete-comment') );
             this.bindChoiceClick( $( '.gd-choice' ) );
             this.clearTeamProgress( $('#clear-team-progress') );
+            this.initEditableTitle( $('.team-submission-title' ) );
+            this.triggerUploadPicButton( $('#gd-upload-profile-pic'), $("#simple-local-avatar"), gd_avatar_upload_form );
+            this.triggerDeletePicButton( $('#gd-remove-profile-pic'), gd_avatar_upload_form );
 
             // hide the quickpost widget if we're displaying a submitted post
             if( $('.gd-submission').length > 0 ){

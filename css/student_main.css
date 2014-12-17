@@ -881,3 +881,15 @@ article {
     height: 100px;
     text-align: center;
 }
+
+.team-submission-title:hover{
+    text-decoration: underline;
+}
+.team-submission-title{
+    cursor: pointer;
+}
+.gd_editable_title input{
+    min-width: 250px;
+    min-height: 30px;
+    font: inherit;
+}

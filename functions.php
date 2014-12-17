@@ -37,9 +37,87 @@ function gd_check_for_locked_step( $choices, $step_id ){
 add_filter('gd_step_choices', 'gd_check_for_locked_step', 10, 2);
 
 /**
+ * Delete profile pic
+ * @uses Simple Local Avatar Plugin
+ * @link http://wordpress.org/extend/plugins/simple-local-avatars/
+ */
+function gd_delete_profile_pic(){
+    global $current_user;
+    $nonce = $_POST['nonce'];
+    if (! wp_verify_nonce($nonce, 'iel_theme_nonce') ){
+        header("HTTP/1.0 409 Security Check.");
+        exit;
+    }
+
+    if( empty($_POST['authorID']) ){
+        header("HTTP/1.0 409 Could not find author ID.");
+        exit;
+    }
+
+    $authorID = (int) $_POST['authorID'];
+    if($current_user->ID != $authorID){
+        header("HTTP/1.0 409 Please edit your own profile!");
+        exit;
+    }
+
+    if( class_exists('Simple_Local_Avatars') ){
+        $localAvatar = new Simple_Local_Avatars();
+
+        $imgInfo = get_user_meta( $authorID, 'simple_local_avatar', true );
+
+        if( empty($imgInfo) ){
+            header("HTTP/1.0 409 Could not find a picture to delete!");
+            exit;
+        }
+
+        $localAvatar->avatar_delete( $authorID );
+        echo json_encode( array('img' => get_avatar($authorID, 80)) );
+    }
+
+    exit;
+}
+add_action('wp_ajax_gd_delete_profile_pic', 'gd_delete_profile_pic');
+
+/**
+ * AJAX handler that saves the post title via j-editable
+ */
+function gd_save_submission_post_title(){
+    $nonce = $_POST[ 'gd_nonce' ];
+    if( !wp_verify_nonce( $nonce, 'gd_edit_submission_title' ) ){
+        header("HTTP/1.0 409 Security Check.");
+        exit;
+    }
+
+    if( !isset( $_POST['value'] ) ){
+        header("HTTP/1.0 409 You cannot leave the title blank! Please fill in a title.");
+        exit;
+    }
+
+    if( !isset( $_POST['postid'] ) ){
+        header("HTTP/1.0 409 Could not find the post ID to update.");
+        exit;
+    }
+
+    $post_id = $_POST['postid'];
+    $post_title = $_POST['value'];
+
+
+    $the_post = array(
+        'ID'         => $post_id,
+        'post_title' => $post_title
+    );
+
+    wp_update_post( $the_post );
+
+    echo $post_title;
+
+    exit;
+}
+add_action( 'wp_ajax_gd_save_submission_post_title', 'gd_save_submission_post_title' );
+
+/**
  * Records the decision of each step
  */
-
 function gd_record_decision(){
     $nonce = $_POST[ 'gd_nonce' ];
     if( !wp_verify_nonce( $nonce, 'gd_record_decision' ) ){

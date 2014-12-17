@@ -16,6 +16,19 @@
 <?php
     // Author object
     $user_obj = get_queried_object();
+
+    // If we are looking at our own page, check if we've uploaded a picture
+    if( $user_obj->ID == get_current_user_id() ){
+        if( class_exists('Simple_Local_Avatars') ){
+
+            $local_avatar = new Simple_Local_Avatars();
+            if( isset( $_POST['delete_avatar'] ) ){
+                $local_avatar->avatar_delete( $user_obj->ID );
+            }else{
+                $local_avatar->edit_user_profile_update( $user_obj->ID );
+            }
+        }
+    }
 ?>
 
 <div class="content-sidebar-wrapper">
@@ -45,9 +58,21 @@
         </div>
 
         <div id="breadcrumbdivider">&nbsp;</div>
-
-        <div id="author-meta" style="">
-            <div id="author-avatar"><?php echo get_avatar( $user_obj->ID, '200' ); ?></div>
+        <div id="author-meta">
+            <div id="author-avatar">
+                <?php echo get_avatar( $user_obj->ID, '200' ); ?>
+                <?php
+                if( $user_obj->ID == get_current_user_id() ){
+                    echo '<br />';
+                    echo '<button id="gd-upload-profile-pic">Upload a Picture</button><button id="gd-remove-profile-pic">Remove Picture</button>';
+                    echo '<form id="gd-avatar-upload" method="post" enctype="multipart/form-data">';
+                        echo '<input type="file" name="simple-local-avatar" id="simple-local-avatar" style="display: none;"/>';
+                        //echo '<input type="submit">';
+                        echo wp_nonce_field( 'simple_local_avatar_nonce', '_simple_local_avatar_nonce', false, false );
+                    echo '</form>';
+                }
+                ?>
+            </div>
             <h1><?php printf( __( '%s', 'twentytwelve' ), get_the_author_meta('display_name', $user_obj->ID) ); ?></h1>
             <?php
                 // get the team the user belongs to ...
