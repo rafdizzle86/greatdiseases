@@ -22,7 +22,6 @@ function gd_check_for_locked_step( $choices, $step_id ){
         foreach( $choices as $choice_key => $choice ){
             $choice_goto_id = $choice['choice_goto_id'];
             if( $choice_goto_id == $curr_team_progress['decisions'][$step_id]->choice_goto_id ){
-                error_log('made it');
                 // override choices with the choice made
                 $choices_new = array( array('choice_title' => $choice['choice_title'], 'choice_goto_id' => $choice['choice_goto_id']) );
                 break;
@@ -177,6 +176,96 @@ function gd_check_progress_point( $sp_post_id ){
     }
 }
 add_action( 'sp_qp_widget_ajax_new_draft', 'gd_check_progress_point', 10, 1 );
+
+/**
+ * Renders team submissions for the progress points
+ * @param $team_id
+ */
+function gd_render_team_submissions( $team_id ){
+
+    $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
+    $team_submissions = array();
+    if( !empty( $team_progress ) ){
+        foreach( $team_progress as $step_id => $step_submmission ){
+            if( $step_id !== 'decisions' ){
+                array_push( $team_submissions, $step_submmission );
+            }
+        }
+    }
+
+    global $wp_query;
+    $wp_query->is_singular = false;
+    $args = array(
+        'post__in' =>  $team_submissions,
+        'posts_per_page' => -1,
+        'paged' => get_query_var( 'paged' ),
+        'order' => 'DESC',
+        'post_type' => 'post'
+    );
+    $team_query = new WP_Query( $args );
+    // The Loop
+    if ( $team_query->have_posts() ) {
+        echo '<ul>';
+        while ( $team_query->have_posts() ) {
+            $team_query->the_post();
+            $step_page_id = get_post_meta( get_the_ID(), 'sp_origin_id', true );
+            ?>
+            <div id="post-<?php the_ID() ?>" class="author-post">
+
+                <!-- post meta -->
+                <h3><a href="<?php echo get_the_permalink( $step_page_id ); ?>"><?php the_title(); ?></a>
+                    <br />
+                    <small style="font-weight: normal;">Submitted in <b><?php echo get_the_title( $step_page_id); ?></b> by <?php the_author_posts_link(); ?> on <?php the_date(); ?>
+                        <?php the_tags( '&nbsp;' . __( '| Tagged:&nbsp;' ) . ' ', ', ', ''); ?>
+                        <?php if( class_exists('smartpost') ){ ?>
+                            |
+                            <?php
+                            if( sp_post::is_sp_post( get_the_ID() ) && current_user_can( 'edit_post', get_the_ID() ) ){
+                                // Check if the permalink structure is with slashes, or the default structure with /?p=123
+                                $permalink_url = get_permalink( get_the_ID() );
+                                $link_txt = "Edit";
+                                if( strpos( $permalink_url, '?')  ){
+                                    $permalink_url .= '&edit_mode=true';
+                                }else{
+                                    $permalink_url .= '?edit_mode=true';
+                                }
+                                ?>
+                                <span class="editlink"><a href="<?php echo $permalink_url ?>"><?php echo $link_txt ?></a></span>
+                            <?php
+                            }else{
+                                edit_post_link(__('Edit'),'<span class="editlink">','</span>');
+                            }
+                            ?>
+                        <?php }else{ ?>
+                            <?php edit_post_link(__('Edit'),'<span class="editlink">','</span>'); ?>
+                        <?php } ?>
+                    </small>
+                </h3>
+
+                <!-- article content -->
+                <div class="content">
+                    <div id="post-thumb-<?php the_ID() ?>" class="post-thumb">
+                        <a href="<?php the_permalink() ?>">
+                            <?php the_post_thumbnail( array(100, 100) ); ?>
+                        </a>
+                    </div>
+                    <?php the_excerpt(); ?>
+                </div>
+                <div class="clear"></div>
+            </div><!-- end post-<?php the_ID() ?>-->
+        <?php
+        }
+        echo '</ul>';
+    }else{
+        ?>
+        <br />
+        <p>To begin, click on the first step in the progress tracker above!</p>
+    <?php
+    }
+    // Restore original Post Data
+    $wp_query->is_singular = true;
+    wp_reset_postdata();
+}
 
 /**
  * Renders the progress tracker of the current users's team

@@ -106,7 +106,6 @@
 
                             // Filters steps before they are shown
                             $step_choices = apply_filters( 'gd_step_choices', $step_choices, get_the_ID() );
-
                             foreach( $step_choices as $choice_id => $choice ){
                                 $goto_permalink = get_permalink( $choice['choice_goto_id'] );
                                 $step_html = '<a href="' . $goto_permalink . '"><span class="gd-choice" data-choiceid="' . $choice_id .'" data-stepid="' . get_the_ID() . '">' . $choice['choice_title'] . '<span></a>';

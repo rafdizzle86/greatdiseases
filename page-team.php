@@ -122,93 +122,14 @@
                     <div id="team-<?php echo $team_id ?>-progress" class="team-progress">
                         <h2>Team Progress: <?php echo $clear_progress ?></h2>
                         <div class="clear"></div>
-                        <?php gd_render_progress_tracker() ?>
+                        <?php gd_render_progress_tracker(); ?>
                         <div class="clear"></div>
                     </div>
 
                     <!-- team submissions -->
                     <div id="team-<?php echo $team_id ?>-submission" class="team-submissions">
                         <h2>Team Submissions:</h2>
-                        <?php
-                        global $wp_query;
-                        $wp_query->is_singular = false;
-                        $args = array(
-                            'author__in' => $team_members_ids,
-                            'posts_per_page' => -1,
-                            'paged' => get_query_var( 'paged' ),
-                            'order' => 'DESC',
-                            'post_type' => 'post'
-                        );
-                        $team_query = new WP_Query( $args );
-                        // The Loop
-                        if ( $team_query->have_posts() ) {
-                            echo '<ul>';
-                            while ( $team_query->have_posts() ) {
-                                $team_query->the_post();
-                                ?>
-                                <div id="post-<?php the_ID() ?>" class="author-post">
-
-                                    <!-- post meta -->
-                                    <h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-                                        <br />
-                                        <small style="font-weight:normal;">Posted on <?php the_date(); ?> by <?php the_author_posts_link(); ?> | Categories: <?php the_category(', '); ?>
-                                            <?php the_tags( '&nbsp;' . __( '| Tagged:&nbsp;' ) . ' ', ', ', ''); ?>
-                                            <?php if( class_exists('smartpost') ) : ?>
-                                                |
-                                                <?php
-                                                if( sp_post::is_sp_post( get_the_ID() ) ){
-                                                    // Check if the permalink structure is with slashes, or the default structure with /?p=123
-                                                    $permalink_url = get_permalink( get_the_ID() );
-                                                    if( $_GET['edit_mode'] ){
-                                                        $link_txt = "View mode";
-                                                    }else{
-                                                        $link_txt = "Edit";
-                                                        if( strpos( $permalink_url, '?')  ){
-                                                            $permalink_url .= '&edit_mode=true';
-                                                        }else{
-                                                            $permalink_url .= '?edit_mode=true';
-                                                        }
-                                                    }
-                                                ?>
-                                                <span class="editlink"><a href="<?php echo $permalink_url ?>"><?php echo $link_txt ?></a></span>
-                                                <?php
-                                                }else{
-                                                    if( current_user_can( 'manage_options' ) ){
-                                                        edit_post_link(__('Edit'),'<span class="editlink">','</span>');
-                                                    }
-                                                 }
-                                                ?>
-                                            <?php else: ?>
-                                                <?php edit_post_link(__('Edit'),'<span class="editlink">','</span>'); ?>
-                                            <?php endif; ?>
-                                        </small>
-                                    </h3>
-
-                                    <!-- article content -->
-                                    <div class="content">
-                                        <div id="post-thumb-<?php the_ID() ?>" class="post-thumb">
-                                            <a href="<?php the_permalink() ?>">
-                                                <?php the_post_thumbnail( array(100, 100) ); ?>
-                                            </a>
-                                        </div>
-                                        <?php the_excerpt(); ?>
-                                    </div>
-                                    <div class="clear"></div>
-                                </div><!-- end post-<?php the_ID() ?>-->
-                                <?php
-                            }
-                            echo '</ul>';
-                        } else {
-                            ?>
-                            <br />
-                            <p>To begin, click on the first step in the progress tracker above!</p>
-                            <?php
-                        }
-
-                        /* Restore original Post Data */
-                        $wp_query->is_singular = true;
-                        wp_reset_postdata();
-                        ?>
+                        <?php gd_render_team_submissions( $team_id ); ?>
                         <div clas="clear"></div>
                     </div>
 
