@@ -9,8 +9,14 @@ include_once( 'gd-admin-progress-pts-table.php' );
  * Checks if the current step is a "locked" step. If it is, it will check if
  * the current team has a submission for the step and display only the choice that the
  * team has made.
+ * @param $choice_html
+ * @param $step_choices
+ * @param $choice_id
+ * @param $choice
+ * @param $step_id
+ * @return mixed
  */
-function gd_check_for_locked_step( $choices, $step_id ){
+function gd_check_for_locked_step( $choice_html, $step_choices, $choice_id, $choice, $step_id ){
     $curr_team_id = gd_get_current_users_team_id();
     $curr_team_progress = get_option('gd-team-' . $curr_team_id . '-progress' );
 
@@ -19,22 +25,17 @@ function gd_check_for_locked_step( $choices, $step_id ){
 
     // If the step is locked and the team has made a decision for this step, the filter the choices
     if( $is_locked && isset( $curr_team_progress['decisions'][$step_id] ) ){
-        foreach( $choices as $choice_key => $choice ){
-            $choice_goto_id = $choice['choice_goto_id'];
-            if( $choice_goto_id == $curr_team_progress['decisions'][$step_id]->choice_goto_id ){
-                // override choices with the choice made
-                $choices_new = array( array('choice_title' => $choice['choice_title'], 'choice_goto_id' => $choice['choice_goto_id']) );
-                break;
-            }
+        if( $choice['choice_goto_id'] != $curr_team_progress['decisions'][$step_id]->choice_goto_id ){
+            return '';
+        }else{
+            return $choice_html;
         }
-    }else{
-        $choices_new = $choices;
     }
 
-    return $choices_new;
+    return $choice_html;
 }
 
-add_filter('gd_step_choices', 'gd_check_for_locked_step', 10, 2);
+add_filter('gd_choice_pre_echo', 'gd_check_for_locked_step', 10, 5);
 
 /**
  * Delete profile pic
@@ -183,8 +184,12 @@ function gd_clear_team_progress(){
         exit;
     }
     $team_progress = get_option( 'gd-team-' . $team_id . '-progress' );
-    if( !empty( $team_progress['decisions'] ) ){
-
+    if( !empty( $team_progress ) ){
+        foreach( $team_progress as $step_id => $submission_id ){
+            if( is_numeric( $submission_id ) ){
+                wp_delete_post( $submission_id );
+            }
+        }
     }
 
     $success = update_option( 'gd-team-' . $team_id . '-progress', array() );
@@ -271,6 +276,9 @@ function gd_render_team_submissions( $team_id ){
         }
     }
 
+    if( empty( $team_submissions ) ){
+        $team_submissions = array( 0 );
+    }
     global $wp_query;
     $wp_query->is_singular = false;
     $args = array(

@@ -48,9 +48,12 @@
                                     $group_info = CTXPS_Queries::get_group_info( $group_id );
                                     $team_page_id = get_option( 'gd_team_page_id' );
                                     $team_page_permalink = get_permalink( $team_page_id );
+
+                                    // A button that will clear a team's progress (delete their posts and the progress they've made)
+                                    $clear_progress = '<button class="button" id="clear-team-progress" data-teamid="' . $group_id . '">Clear Team Progress</button>';
                                     ?>
                                     <div id="<?php echo $group_info->ID ?>" class="gd-tdash-group">
-                                        <p><a href="<?php echo $team_page_permalink ?>?team_id=<?php echo $group_info->ID ?>"><?php echo $group_info->group_title ?></a></p>
+                                        <p><a href="<?php echo $team_page_permalink ?>?team_id=<?php echo $group_info->ID ?>"><?php echo $group_info->group_title ?></a> <?php echo $clear_progress ?></p>
                                         <p><?php echo $group_info->group_description ?></p>
                                         <?php
                                             if( !empty( $group_members ) ){
@@ -66,6 +69,7 @@
                                     </div>
                                     <?php
                                 }
+                                wp_nonce_field('gd_clear_team_progress', 'gd_clear_team_progress_nonce' );
                                 echo '</div><!-- end #teacher-groups -->';
                             }
 

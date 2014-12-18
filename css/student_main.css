@@ -128,7 +128,13 @@ ul#udm ul {
     box-shadow: 10px 10px 5px #888888;
     border: 1px solid black;
 }
-
+.gd-image-alignright{
+    float: right;
+    margin-left: 25px !important;
+    margin-top: 10px !important;
+    box-shadow: 10px 10px 5px #888888;
+    border: 1px solid black;
+}
 .content {
 	font-size: 15px;
 	line-height: 1.5em;

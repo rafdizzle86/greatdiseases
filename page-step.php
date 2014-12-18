@@ -107,14 +107,16 @@
 
                             // Filters steps before they are shown
                             $step_choices = apply_filters( 'gd_step_choices', $step_choices, get_the_ID() );
+
                             foreach( $step_choices as $choice_id => $choice ){
+
                                 $goto_permalink = get_permalink( $choice['choice_goto_id'] );
-                                $step_html = '<a href="' . $goto_permalink . '"><span class="gd-choice" data-choiceid="' . $choice_id .'" data-stepid="' . get_the_ID() . '">' . $choice['choice_title'] . '<span></a>';
+                                $choice_html = '<a href="' . $goto_permalink . '"><span class="gd-choice" data-choiceid="' . $choice_id .'" data-stepid="' . get_the_ID() . '">' . $choice['choice_title'] . '<span></a>';
 
                                 // Filters the step before it is echoed
-                                $step_html = apply_filters( 'gd_choice_pre_echo', $step_html, get_the_ID() );
+                                $choice_html = apply_filters( 'gd_choice_pre_echo', $choice_html, $step_choices, $choice_id, $choice, get_the_ID() );
 
-                                echo $step_html;
+                                echo $choice_html;
                             }
                             wp_nonce_field( 'gd_record_decision', 'gd_decision_step' );
                             echo '</div>';
